@@ -11,10 +11,10 @@ interface IERC777Token {
         address operator,
         address holder
     ) external view returns (bool);
-//    function authorizeOperator(address operator) external;
-//    function revokeOperator(address operator) external;
-//
-//    function send(address to, uint256 amount, bytes calldata data) external;
+    function authorizeOperator(address operator) external;
+    function revokeOperator(address operator) external;
+
+    function send(address to, uint256 amount, bytes calldata data) external;
 //    function operatorSend(
 //        address from,
 //        address to,
@@ -53,9 +53,9 @@ interface IERC777Token {
 //        bytes data,
 //        bytes operatorData
 //    );
-//    event AuthorizedOperator(
-//        address indexed operator,
-//        address indexed holder
-//    );
-//    event RevokedOperator(address indexed operator, address indexed holder);
+    event AuthorizedOperator(
+        address indexed operator,
+        address indexed holder
+    );
+    event RevokedOperator(address indexed operator, address indexed holder);
 }
