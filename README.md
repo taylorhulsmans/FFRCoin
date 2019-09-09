@@ -16,3 +16,8 @@ no one may lend outside of the reserve ratio of ~61.8%
 - [] a chronjob that will scrape 4chan for gets with eth addresses, and mint tokens for them
 - [] a simple web ui
 - [] getting [this guy](https://www.patreon.com/tarotofkek) to do the design work
+
+## Build
+
+ ```npm install -g ganache-cli``` [ganachi-cli](https://www.npmjs.com/package/ganache-cli)
+ ```npm install truffle -g``` [truffle](https://github.com/trufflesuite/truffle)
