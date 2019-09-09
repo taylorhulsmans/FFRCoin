@@ -2,9 +2,19 @@ const FiatFrenzy = artifacts.require("FiatFrenzy");
 
 contract("FiatFrenzy", async (accounts) => {
 	let instance;
-
+  let loanOffers;
 	beforeEach("setup contract for each test", async () => {
-		instance = await FiatFrenzy.deployed(accounts[1]);
+    instance = await FiatFrenzy.deployed(accounts[1]);
+    loanOffers = await instance.getPastEvents('loanOffer', {
+      fromBlock: 0,
+      toBlock: 'latest'
+    }, (err, result) => {
+      if (!err) {
+        return result
+      } else {
+        console.log(error)
+      }
+    })
 	})
 
 	it("should return the name", async () => {
@@ -79,7 +89,40 @@ contract("FiatFrenzy", async (accounts) => {
 		assert.equal(false, zeroOpTwo)
 	})
 
+  it("accounts[1] is the only one who can mint tokens", async () => {
+    let mint = await instance.operatorMint.sendTransaction(accounts[0], 100, {from: accounts[1]})
+    let balanceOf = await instance.balanceOf.call(accounts[0]);
+    assert.equal(balanceOf, 100)
+    try {
+      let mintHack = await instance.operatorMint.sendTransaction(accounts[0], 100)
+    } catch (e) {
+      assert.equal(e, 'Error: Returned error: VM Exception while processing transaction: revert executive function only -- Reason given: executive function only.')
+    }
+  });
 
+  it("can send tokens", async () => {
+    let send = await instance.send.sendTransaction(accounts[2], 50, '0xff');
+    let balance0 = await instance.balanceOf.call(accounts[0])
+    let balance2 = await instance.balanceOf.call(accounts[2])
+    assert.equal(balance0, 50)
+    assert.equal(balance2, 50)
+  });
+
+  it("can offer a loan", async () => {
+    let offerLoan = await instance.offerLoan.sendTransaction(accounts[3], 10, {from: accounts[2]})
+    let index = await instance.getLoanIndex.call(accounts[2], accounts[3])
+    assert.equal(index, 1);
+  })
+
+  it("can sign a loan", async () => {
+    let signLoan = await instance.signLoan.sendTransaction(accounts[2], 1, {from: accounts[3]});
+    let balanceOf3 = await instance.balanceOf.call(accounts[3])
+    assert.equal(balanceOf3, 10)
+    let liabilitiesOf3 = await instance.liabilitiesOf.call(accounts[3])
+    assert.equal(liabilitiesOf3, 10)
+    
+
+  })
 
 
 

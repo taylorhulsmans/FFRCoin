@@ -1,6 +1,6 @@
 pragma solidity 0.5.8;
 
-interface IERC777Token {
+interface IFiatFrenzy {
     function name() external view returns (string memory);
     function symbol() external view returns (string memory);
     function totalSupply() external view returns (uint256);
@@ -31,21 +31,17 @@ interface IERC777Token {
 //        bytes calldata operatorData
 //    ) external;
 //
-//    event Sent(
-//        address indexed operator,
-//        address indexed from,
-//        address indexed to,
-//        uint256 amount,
-//        bytes data,
-//        bytes operatorData
-//    );
-//    event Minted(
-//        address indexed operator,
-//        address indexed to,
-//        uint256 amount,
-//        bytes data,
-//        bytes operatorData
-//    );
+    event Sent(
+        address indexed from,
+        address indexed to,
+        uint256 amount,
+        bytes data
+    );
+    event Minted(
+        address indexed operator,
+        address indexed to,
+        uint256 amount
+    );
 //    event Burned(
 //        address indexed operator,
 //        address indexed from,
