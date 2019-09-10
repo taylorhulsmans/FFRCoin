@@ -80,11 +80,11 @@ contract FiatFrenzy is IFiatFrenzy {
   }
 
   modifier isWithinReserveRatio(
-    address sender,
+    address lendor,
     uint256 amount
   ) {
-    Account memory account = _accounts[sender];
-    uint256 currentRatio = Helpers.percent(account._liabilities + amount, account._assets + account._balance, 9);
+    Account memory account = _accounts[lendor];
+    uint256 currentRatio = Helpers.percent(account._liabilities + amount, account._balance, 9);
     require(currentRatio <= _reserveRequirement, "apologies, reserve requirement exceeded");
     _;
   } 
@@ -110,6 +110,10 @@ contract FiatFrenzy is IFiatFrenzy {
   function symbol() external view returns (string memory) {
     return _symbol;
   }
+
+	function reserveRequirement() external view returns (uint256) {
+		return _reserveRequirement;
+	}
 
   function totalSupply() external view returns (uint256) {
     return _totalSupply;
@@ -216,9 +220,13 @@ contract FiatFrenzy is IFiatFrenzy {
   function signLoan(
     address lendor,
     uint256 index
-  ) public {
+  ) isWithinReserveRatio(
+			lendor,
+			_loans[lendor][msg.sender][index -1]._principle
+	) public {
+
     Loan storage loan = _loans[lendor][msg.sender][index - 1];
-    Account storage lendorAccount = _accounts[lendor];
+		Account storage lendorAccount = _accounts[lendor];
     Account storage debtorAccount = _accounts[msg.sender];
     
     debtorAccount._balance += loan._principle;

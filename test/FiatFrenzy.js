@@ -1,8 +1,11 @@
 const FiatFrenzy = artifacts.require("FiatFrenzy");
 
+// Account helper
+
 contract("FiatFrenzy", async (accounts) => {
 	let instance;
-  let loanOffers;
+	let loanOffers;
+
 	beforeEach("setup contract for each test", async () => {
     instance = await FiatFrenzy.deployed(accounts[1]);
     loanOffers = await instance.getPastEvents('loanOffer', {
@@ -120,10 +123,40 @@ contract("FiatFrenzy", async (accounts) => {
     assert.equal(balanceOf3, 10)
     let liabilitiesOf3 = await instance.liabilitiesOf.call(accounts[3])
     assert.equal(liabilitiesOf3, 10)
-    
-
   })
 
+	it("can't loan past the reserveratio", async () => {
+		let balance = await instance.balanceOf(accounts[2])
+		let liabilities = await instance.liabilitiesOf(accounts[2])
+		let assets = await instance.assetsOf(accounts[2])
+		balance = balance.toNumber()
+		liabilities =liabilities.toNumber()
+		assets = assets.toNumber()
+		// liabilites / money coming in (assets) + balance <= 0.618
+		let currentRatio = (liabilities / (balance));
+		
+		let reserveRequirement = 0.618033989
+		console.log(balance, liabilities, assets)
+		console.log(currentRatio)
+		
+		try {
+			let offerLoan = await instance.offerLoan.sendTransaction(accounts[3], 20, {from: accounts[2]});
+		} catch (e) {
+			assert.fail(e)
+		}
+		let signLoan = await instance.signLoan.sendTransaction(accounts[2], 2, {from: accounts[3]});
+	  let balance2 = await instance.balanceOf(accounts[2])
+		let liabilities2 = await instance.liabilitiesOf(accounts[2])
+		let assets2 = await instance.assetsOf(accounts[2])
+		
+		balance2 = balance2.toNumber()
+		liabilities2 = liabilities2.toNumber()
+		assets2 = assets2.toNumber()
+		
+		currentRatio = (liabilities2 / balance2);
+		console.log(currentRatio)
+			
+	});
 
 
 })

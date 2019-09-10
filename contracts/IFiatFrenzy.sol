@@ -42,6 +42,7 @@ interface IFiatFrenzy {
         address indexed to,
         uint256 amount
     );
+// remake game with burn, play until all information is lost
 //    event Burned(
 //        address indexed operator,
 //        address indexed from,
