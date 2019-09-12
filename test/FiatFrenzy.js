@@ -137,7 +137,6 @@ contract("FiatFrenzy", async (accounts) => {
 		
 		let reserveRequirement = 0.618033989
 		console.log(balance, liabilities, assets)
-		console.log(currentRatio)
 		
 		try {
 			let offerLoan = await instance.offerLoan.sendTransaction(accounts[3], 20, {from: accounts[2]});
@@ -154,9 +153,22 @@ contract("FiatFrenzy", async (accounts) => {
 		assets2 = assets2.toNumber()
 		
 		currentRatio = (liabilities2 / balance2);
-		console.log(currentRatio)
 			
 	});
 
+	it("can repay a loan", async () => {
+		let balance3 = await instance.balanceOf(accounts[3])
+		let liabilities3 = await instance.liabilitiesOf(accounts[3])
+		let assets3 = await instance.assetsOf(accounts[3])
+		console.log(balance3.toNumber(), liabilities3.toNumber(), assets3.toNumber())	
+		let repayLoan = await instance.repayLoan(accounts[2], 1, {from: accounts[3]})
+		balance3 = await instance.balanceOf(accounts[3])
+		liabilities3 = await instance.liabilitiesOf(accounts[3])
+		assets3 = await instance.assetsOf(accounts[3])
+		console.log(balance3.toNumber(), liabilities3.toNumber(), assets3.toNumber())	
+		assert.equal(balance3, 30 - 10)
+		assert.equal(liabilities3, 30 - 10)
+		assert.equal(assets3, 0)
+	})
 
 })

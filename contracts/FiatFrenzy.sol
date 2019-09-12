@@ -69,6 +69,12 @@ contract FiatFrenzy is IFiatFrenzy {
     address indexed _debtor
   );
 
+  event LoanRepaid(
+    address indexed _lendor,
+    uint256 indexed _index,
+    address indexed _debtor
+  );
+
   modifier notSelf(address sender, address target) {
     require(sender != target, "This function is not self callable");
     _;
@@ -111,9 +117,9 @@ contract FiatFrenzy is IFiatFrenzy {
     return _symbol;
   }
 
-	function reserveRequirement() external view returns (uint256) {
-		return _reserveRequirement;
-	}
+  function reserveRequirement() external view returns (uint256) {
+    return _reserveRequirement;
+  }
 
   function totalSupply() external view returns (uint256) {
     return _totalSupply;
@@ -199,7 +205,7 @@ contract FiatFrenzy is IFiatFrenzy {
     uint256 amount
   ) isMultipleOf(amount)
     isWithinReserveRatio(msg.sender, amount)
-  public {
+  external {
     Loan memory newLoan = Loan(amount, now, false);
     // _loans[lendor][debtor]
     _loans[msg.sender][debtor].push(newLoan);
@@ -212,7 +218,7 @@ contract FiatFrenzy is IFiatFrenzy {
   function getLoanIndex(
     address lendor,
     address debtor
-  ) public view returns (uint256) {
+  ) external view returns (uint256) {
     uint256 index = _loanIndicies[lendor][debtor].length;
     return index;
   }
@@ -221,12 +227,12 @@ contract FiatFrenzy is IFiatFrenzy {
     address lendor,
     uint256 index
   ) isWithinReserveRatio(
-			lendor,
-			_loans[lendor][msg.sender][index -1]._principle
-	) public {
+      lendor,
+      _loans[lendor][msg.sender][index -1]._principle
+  ) external {
 
     Loan storage loan = _loans[lendor][msg.sender][index - 1];
-		Account storage lendorAccount = _accounts[lendor];
+    Account storage lendorAccount = _accounts[lendor];
     Account storage debtorAccount = _accounts[msg.sender];
     
     debtorAccount._balance += loan._principle;
@@ -238,5 +244,30 @@ contract FiatFrenzy is IFiatFrenzy {
     loan._isApproved = true;
 
     emit loanSign(lendor, index, msg.sender);
+  }
+
+  function getDebtIndex(
+    address lendor
+  ) external view returns (uint256) {
+    return _loans[lendor][msg.sender].length;
+  }
+
+  function repayLoan(
+    address lendor,
+    uint256 index
+  ) external {
+    Loan storage loan = _loans[lendor][msg.sender][index - 1];
+    Account storage debtorAccount = _accounts[msg.sender];
+    Account storage lendorAccount = _accounts[lendor];
+    require(debtorAccount._balance >= loan._principle, 'insufficient funds');
+    
+    debtorAccount._balance -= loan._principle;
+    debtorAccount._liabilities -= loan._principle;
+
+    lendorAccount._liabilities -= loan._principle;
+    lendorAccount._assets -= loan._principle;
+    lendorAccount._balance += loan._principle;
+    loan._principle = 0;
+    emit LoanRepaid(lendor, index, msg.sender);
   }
 } 
