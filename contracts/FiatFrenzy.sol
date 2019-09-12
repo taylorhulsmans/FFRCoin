@@ -1,5 +1,5 @@
 pragma solidity 0.5.8;
-import { IFiatFrenzy} from './IFiatFrenzy.sol';
+import { IFiatFrenzy } from './IFiatFrenzy.sol';
 import './Helpers.sol';
 contract FiatFrenzy is IFiatFrenzy {
   // Coin Meta
@@ -69,7 +69,7 @@ contract FiatFrenzy is IFiatFrenzy {
     address indexed _debtor
   );
 
-  event LoanRepaid(
+  event loanRepaid(
     address indexed _lendor,
     uint256 indexed _index,
     address indexed _debtor
@@ -181,7 +181,21 @@ contract FiatFrenzy is IFiatFrenzy {
     
     emit Minted(msg.sender, to, amount);
   }
-  
+ 
+  function _send(
+    address to,
+    address from,
+    uint256 amount
+  ) internal {
+    require(to != address(0), 'no tokens to 0x0');
+    Account storage senderAccount = _accounts[from];
+    require(senderAccount._balance >= amount, "Insufficient Funds");
+    Account storage recieverAccount = _accounts[to];
+
+    senderAccount._balance -= amount;
+    recieverAccount._balance += amount;
+
+  } 
   function send(
     address to,
     uint256 amount,
@@ -189,14 +203,7 @@ contract FiatFrenzy is IFiatFrenzy {
   ) isMultipleOf(amount)
     isWithinReserveRatio(msg.sender, amount)
   external {
-    require(to != address(0), 'no tokens to 0x0');
-    Account storage senderAccount = _accounts[msg.sender];
-    require(senderAccount._balance >= amount, "Insufficient Funds");
-    Account storage recieverAccount = _accounts[to];
-
-    senderAccount._balance -= amount;
-    recieverAccount._balance += amount;
-
+    _send(to, msg.sender, amount);   
     emit Sent(msg.sender, to, amount, data); 
   }
 
@@ -221,6 +228,15 @@ contract FiatFrenzy is IFiatFrenzy {
   ) external view returns (uint256) {
     uint256 index = _loanIndicies[lendor][debtor].length;
     return index;
+  }
+
+  function getLoan(
+    address lendor,
+    address debtor,
+    uint256 index
+  ) external view returns (uint256, uint256, bool) {
+    Loan memory loan =  _loans[lendor][debtor][index - 1];  
+    return (loan._principle, loan._time, loan._isApproved);
   }
 
   function signLoan(
@@ -259,15 +275,14 @@ contract FiatFrenzy is IFiatFrenzy {
     Loan storage loan = _loans[lendor][msg.sender][index - 1];
     Account storage debtorAccount = _accounts[msg.sender];
     Account storage lendorAccount = _accounts[lendor];
-    require(debtorAccount._balance >= loan._principle, 'insufficient funds');
+    _send(lendor, msg.sender, loan._principle);
     
-    debtorAccount._balance -= loan._principle;
     debtorAccount._liabilities -= loan._principle;
-
+    
     lendorAccount._liabilities -= loan._principle;
     lendorAccount._assets -= loan._principle;
-    lendorAccount._balance += loan._principle;
+    
     loan._principle = 0;
-    emit LoanRepaid(lendor, index, msg.sender);
+    emit loanRepaid(lendor, index, msg.sender);
   }
 } 

@@ -160,15 +160,34 @@ contract("FiatFrenzy", async (accounts) => {
 		let balance3 = await instance.balanceOf(accounts[3])
 		let liabilities3 = await instance.liabilitiesOf(accounts[3])
 		let assets3 = await instance.assetsOf(accounts[3])
-		console.log(balance3.toNumber(), liabilities3.toNumber(), assets3.toNumber())	
+		
+		let loan = await instance.getLoan(accounts[2], accounts[3], 1)
+		
+		let balance2 = await instance.balanceOf(accounts[2])
+		let liabilities2 = await instance.liabilitiesOf(accounts[2])
+		let assets2 = await instance.assetsOf(accounts[2])
+		console.log('loan', loan[0].toNumber())	
+		console.log('debtor', balance3.toNumber(), liabilities3.toNumber(), assets3.toNumber())	
+		
+		console.log('lendor', balance2.toNumber(), liabilities2.toNumber(), assets2.toNumber())	
 		let repayLoan = await instance.repayLoan(accounts[2], 1, {from: accounts[3]})
 		balance3 = await instance.balanceOf(accounts[3])
 		liabilities3 = await instance.liabilitiesOf(accounts[3])
 		assets3 = await instance.assetsOf(accounts[3])
-		console.log(balance3.toNumber(), liabilities3.toNumber(), assets3.toNumber())	
-		assert.equal(balance3, 30 - 10)
-		assert.equal(liabilities3, 30 - 10)
-		assert.equal(assets3, 0)
+
+		loan = await instance.getLoan(accounts[2], accounts[3], 1)
+		console.log('loan', loan[0].toNumber())	
+		console.log( 'debtor', balance3.toNumber(), liabilities3.toNumber(), assets3.toNumber())
+
+		console.log('lendor', balance2.toNumber(), liabilities2.toNumber(), assets2.toNumber())	
+		balance2 = await instance.balanceOf(accounts[2])
+		liabilities2 = await instance.liabilitiesOf(accounts[2])
+		assets2 = await instance.assetsOf(accounts[2])
+
+		
+		assert.equal(balance3.toNumber(), 30 - 10)
+		assert.equal(liabilities3.toNumber(), 30 - 10)
+		assert.equal(assets3.toNumber(), 0)
 	})
 
 })
