@@ -5,12 +5,22 @@
         @click.stop="drawer = !drawer">
       </v-app-bar-nav-icon>
      
-      <v-toolbar-title>Fiat Frenzy</v-toolbar-title>
+      <v-btn
+        to="/">
+        <v-toolbar-title>
+          Fiat Frenzy
+        </v-toolbar-title>
+      </v-btn>
 
       <v-btn icon
         v-for="button in leftNav"
         :key="button.name"
-        @click="go(button.name)">
+        :to="button.name" exact
+        active-class="highlighted"
+        :class="button.name === $route.path ?
+          'highlighted':
+          ''
+        ">
         <v-icon>{{button.symbol}}</v-icon>
       </v-btn>
       
@@ -19,7 +29,12 @@
       <v-btn icon
         v-for="button in rightNav"
         :key="button.name"
-        @click="go(button.name)">
+        :to="button.name" exact
+        active-class="highlighted"
+        :class="button.name === $route.path ?
+          'highlighted':
+          ''
+        ">
         <v-icon>{{button.symbol}}</v-icon>
       </v-btn>
 
