@@ -1,15 +1,16 @@
 <template>
-    <TopNav />
+    <TopNav>
+    </TopNav>
 </template>
 <script>
-import TopNav from '../components/Navbars/TopNav.vue';
-
+import TopNav from '../components/TopNav.vue';
 export default {
   components: {
     TopNav,
   },
 
   data: () => ({
+    child_component: 'playNav',
   }),
 };
 </script>

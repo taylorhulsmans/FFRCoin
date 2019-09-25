@@ -1,10 +1,7 @@
 <template>
   <div>
     <v-toolbar dense>
-      <v-app-bar-nav-icon
-        @click.stop="drawer = !drawer">
-      </v-app-bar-nav-icon>
-     
+      
       <v-btn
         to="/">
         <v-toolbar-title>
@@ -24,7 +21,9 @@
         <v-icon>{{button.symbol}}</v-icon>
       </v-btn>
       
-      <div class="flex-grow-1"></div>
+      <div class="flex-grow-1">
+        <PlayNav v-if="$route.path == '/play'"/>
+      </div>
       
       <v-btn icon
         v-for="button in rightNav"
@@ -39,44 +38,15 @@
       </v-btn>
 
     </v-toolbar>
-   <v-navigation-drawer
-          clipped
-          v-model="drawer"
-          style='height:100%'
-        >
-          <v-list
-      nav
-      dense
-          >
-      <v-list-item-group
-        v-model="group"
-        active-class="deep-purple--text text--accent-4"
-      >
-        <v-list-item>
-          <v-list-item-title>Foo</v-list-item-title>
-        </v-list-item>
-
-        <v-list-item>
-          <v-list-item-title>Bar</v-list-item-title>
-        </v-list-item>
-
-        <v-list-item>
-          <v-list-item-title>Fizz</v-list-item-title>
-        </v-list-item>
-
-        <v-list-item>
-          <v-list-item-title>Buzz</v-list-item-title>
-        </v-list-item>
-      </v-list-item-group>
-          </v-list>
-        </v-navigation-drawer>
   </div>
 </template>
 <script>
-
+import PlayNav from './play/Nav.vue';
 export default {
+  components: {
+    PlayNav
+  },
   data() {
-    console.log(this.$router)
     return {
       leftNav: [
         {
@@ -108,7 +78,6 @@ export default {
 
 
       ],
-      drawer: false,
       group: null,
     }
   },
