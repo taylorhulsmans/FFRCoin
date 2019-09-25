@@ -6,33 +6,23 @@
       </v-app-bar-nav-icon>
      
       <v-toolbar-title>Fiat Frenzy</v-toolbar-title>
-      
-      <v-btn icon>
-        <v-icon>mdi-play-circle-outline</v-icon>
-      </v-btn>
-      
-      <v-btn icon>
-        <v-icon>mdi-trophy-outline</v-icon>
-      </v-btn>
 
+      <v-btn icon
+        v-for="button in leftNav"
+        :key="button.name"
+        @click="go(button.name)">
+        <v-icon>{{button.symbol}}</v-icon>
+      </v-btn>
+      
       <div class="flex-grow-1"></div>
       
-      <v-btn icon>
-        <v-icon>mdi-cube-scan</v-icon>
+      <v-btn icon
+        v-for="button in rightNav"
+        :key="button.name"
+        @click="go(button.name)">
+        <v-icon>{{button.symbol}}</v-icon>
       </v-btn>
 
-      <v-btn icon>
-        <v-icon>mdi-github-circle</v-icon>
-      </v-btn>
-
-      <v-btn icon>
-        <v-icon>mdi-account</v-icon>
-      </v-btn>
-      
-      <v-btn icon>
-        <v-icon>mdi-magnify</v-icon>
-      </v-btn>
-    
     </v-toolbar>
    <v-navigation-drawer
           clipped
@@ -70,9 +60,47 @@
 <script>
 
 export default {
-  data: () => ({
-    drawer: false,
-    group: null,
-  }),
+  data() {
+    console.log(this.$router)
+    return {
+      leftNav: [
+        {
+          name: 'play',
+          symbol: 'mdi-play-circle-outline',
+        },
+        {
+          name: 'leaderboard',
+          symbol: 'mdi-trophy-outline',
+        },
+      ],
+      rightNav: [
+        {
+          name: 'github',
+          symbol: 'mdi-github-circle',
+        },
+        {
+          name: 'blockchain',
+          symbol: 'mdi-cube-scan',
+        },
+        {
+          name: 'search',
+          symbol: 'mdi-magnify',
+        },
+        {
+          name: 'account',
+          symbol: 'mdi-account',
+        }
+
+
+      ],
+      drawer: false,
+      group: null,
+    }
+  },
+  methods: {
+    go(name) {
+      this.$router.push({ path: name });
+    },
+  },
 };
 </script>
