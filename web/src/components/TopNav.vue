@@ -20,11 +20,11 @@
         ">
         <v-icon>{{button.symbol}}</v-icon>
       </v-btn>
-      
+
       <div class="flex-grow-1">
         <PlayNav v-if="$route.path == '/play'"/>
       </div>
-      
+
       <v-btn icon
         v-for="button in rightNav"
         :key="button.name"
@@ -82,9 +82,6 @@ export default {
     }
   },
   methods: {
-    go(name) {
-      this.$router.push({ path: name });
-    },
   },
 };
 </script>

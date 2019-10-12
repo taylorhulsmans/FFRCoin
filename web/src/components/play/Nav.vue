@@ -17,6 +17,33 @@
           Balance
       </v-chip>
 
+      <v-chip
+        class='ma-2'
+        color='yellow'
+        text-color="black"
+        >
+        <v-avatar
+          left
+          class="yellow darken-4"
+          >{{assets}}
+        </v-avatar>
+          assets
+      </v-chip>
+
+      <v-chip
+        class='ma-2'
+        color='red'
+        text-color="white"
+        >
+        <v-avatar
+          left
+          class="red darken-4"
+          >{{liabilities}}
+        </v-avatar>
+          Liabilities
+      </v-chip>
+
+
     </v-toolbar>
   </div>
 </template>
@@ -28,7 +55,9 @@ export default {
   data() {
     return {
       contract: null,
-      balance: null
+      balance: null,
+      liabilities: null,
+      assets: null
 
     }
   },
@@ -61,10 +90,13 @@ export default {
     },
     async getBalances() {
       try {
-        let balance = await this.contract.methods.balanceOf(this.addresses[0]).call()
+        const balance = await this.contract.methods.balanceOf(this.addresses[0]).call();
+        const liabilities = await this.contract.methods.liabilitiesOf(this.addresses[0]).call();
+        const assets = await this.contract.methods.assetsOf(this.addresses[0]).call();
 
-        console.log(balance)
         this.balance = balance
+        this.liabilities = liabilities
+        this.assets = assets
       } catch (e) {
         console.log(e)
       }
