@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <v-app id="home">
     <TopNav />
-  </div>
+  </v-app>
 </template>
 <script>
 import TopNav from '../components/TopNav.vue';

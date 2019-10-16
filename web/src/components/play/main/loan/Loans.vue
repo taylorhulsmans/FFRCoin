@@ -1,12 +1,15 @@
+
 <template>
-  <div>
-    <p>hi</p>
-  </div>
+  <v-app>
+    <h1>Hello</h1>
+  </v-app>
 </template>
 <script>
 export default {
   data() {
-    return {};
+    return {
+
+    };
   },
 };
 </script>

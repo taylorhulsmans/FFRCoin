@@ -1,9 +1,11 @@
 <template>
-  <v-card>
     <v-navigation-drawer
+      app
       expand-on-hover
       permanent
-    >
+      class="mt-5"
+      style='top: 28px; display: block'
+      >
       <v-divider></v-divider>
       <v-list
         nav
@@ -16,6 +18,7 @@
           <v-list-item
             v-for="(option, i) in options"
             :key="i"
+            @click="$emit('change-main', option.component)"
           >
            <v-list-item-icon>
              <v-icon>{{option.icon}}</v-icon>
@@ -26,7 +29,6 @@
         </v-list-item-group>
       </v-list>
     </v-navigation-drawer>
-  </v-card>
 </template>
 <script>
 export default {
@@ -37,21 +39,28 @@ export default {
         {
           title: 'Dashboard',
           icon: 'mdi-view-dashboard',
+          component: 'Dashboard',
         },
         {
           title: 'My Loans',
           icon: 'mdi-arrow-expand-up',
+          component: 'Loan'
         },
         {
           title: 'My Debts',
           icon: 'mdi-arrow-expand-down',
+          component: 'Debt',
         },
         {
           title: 'Starred',
           icon: 'mdi-star',
+          component: 'Starred',
         },
       ],
     };
   },
+  methods: {
+
+  }
 };
 </script>
