@@ -1,12 +1,10 @@
 <template>
-  <v-container
-    fluid
-    style="margin-left: 80px">
+  <v-container fluid>
+      <v-col cols="12">
         <v-row
           align="start"
           justify="start"
           style="height: 300px"
-          
         >
         <v-card
           v-for="(card, j) in cards"
@@ -15,9 +13,11 @@
           outlined
           tile
         >
-        <h1>{{card.name}}</h1>
+        <h1>Hello Card</h1>
+        <p>{{card.name}}</p>
         </v-card>
         </v-row>
+      </v-col>
   </v-container>
 </template>
 <script>
@@ -26,25 +26,22 @@ export default {
     return {
       cards: [
         {
-          name: 'Rank',
+          name: 'name',
         },
         {
-          name: 'Loans Lent',
+          name: 'name',
         },
         {
-          name: 'Debts Collected (%)',
+          name: 'name',
         },
         {
-          name: 'Debts payed pack (%)',
+          name: 'name',
         },
         {
-          name: 'Available Funds',
+          name: 'name',
         },
-        {
-          name: 'Minted with Gets',
-        }
       ],
     };
   },
 };
-</script>
+<

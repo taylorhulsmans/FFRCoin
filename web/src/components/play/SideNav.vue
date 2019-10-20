@@ -44,7 +44,7 @@ export default {
         {
           title: 'My Loans',
           icon: 'mdi-arrow-expand-up',
-          component: 'Loan'
+          component: 'Loans',
         },
         {
           title: 'My Debts',

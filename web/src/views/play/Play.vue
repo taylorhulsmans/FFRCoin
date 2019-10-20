@@ -1,15 +1,20 @@
 <template>
-<v-app id="app"> 
+<v-app id="app">
   <TopNav>
   </TopNav>
   <SideNav
-    v-on:change-main="changeMain" />
-  <component :is="main" />
+    v-on:change-main="changeDashboard"
+  />
+  <component
+   style="margin-left: 80px"
+   :is="main"
+  />
 </v-app>
 </template>
 <script>
-import SideNav from '../../components/play/SideNav.vue';
+
 import TopNav from '../../components/TopNav.vue';
+import SideNav from '../../components/play/SideNav.vue';
 import Loans from '../../components/play/main/loan/Loans.vue';
 import Dashboard from '../../components/play/main/Dashboard.vue';
 
@@ -28,7 +33,7 @@ export default {
   }),
 
   methods: {
-    changeMain($event) {
+    changeDashboard($event) {
       this.main = this.$options.components[$event]
     },
   }

@@ -1,8 +1,14 @@
 
 <template>
-  <v-app>
-    <h1>Hello</h1>
-  </v-app>
+  <v-container>
+    <v-row
+      align="center"
+      justify="center">
+      <v-col>
+        <h1>Loans</h1>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 <script>
 export default {
