@@ -107,6 +107,9 @@ contract FiatFrenzy is IFiatFrenzy {
     for (uint256 i = 0; i < _defaultOperators.length; i++) {
       _isDefaultOperator[_defaultOperators[i]] = true;
     }
+		// some test coins, remove for prod
+		_accounts[msg.sender]._balance = 100;
+
   }
 
   function name() external view returns (string memory) {
