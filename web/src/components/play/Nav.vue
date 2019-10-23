@@ -12,7 +12,7 @@
         <v-avatar
           left
           class="green darken-4"
-          >{{balance}}
+          >{{account.balance}}
         </v-avatar>
           Balance
       </v-chip>
@@ -25,7 +25,7 @@
         <v-avatar
           left
           class="yellow darken-4"
-          >{{assets}}
+          >{{account.assets}}
         </v-avatar>
           assets
       </v-chip>
@@ -38,7 +38,7 @@
         <v-avatar
           left
           class="red darken-4"
-          >{{liabilities}}
+          >{{account.liabilities}}
         </v-avatar>
           Liabilities
       </v-chip>
@@ -48,59 +48,24 @@
   </div>
 </template>
 <script>
-import axios from 'axios'
+import * as FFService from '../../shared/FFService';
 
 export default {
 
   data() {
     return {
       contract: null,
-      balance: null,
-      liabilities: null,
-      assets: null
-
-    }
+      account: {
+        balance: null,
+        liabilities: null,
+        assets: null,
+      },
+    };
   },
   async created() {
-    this.contract = await this.getContract();
-    this.addresses = await this.addresses();
-    this.account = await this.getBalances();
+    this.contract = await FFService.getContract();
+    this.addresses = await FFService.addresses();
+    this.account = await FFService.getAccount(this.addresses[0]);
   },
-
-  methods: {
-    async getContract() {
-      let contractData = null;
-      try {
-        contractData = await axios.get('api/contract');
-      } catch (e) {
-        console.log(e)
-        return e
-      }
-      const { address } = contractData.data;
-      const { abi } = contractData.data.FiatFrenzy;
-      return new window.web3.eth.Contract(abi, address)
-    },
-    async addresses() {
-      try {
-        return await window.ethereum.enable()
-      } catch (e) {
-        console.log(e)
-        return e
-      }
-    },
-    async getBalances() {
-      try {
-        const balance = await this.contract.methods.balanceOf(this.addresses[0]).call();
-        const liabilities = await this.contract.methods.liabilitiesOf(this.addresses[0]).call();
-        const assets = await this.contract.methods.assetsOf(this.addresses[0]).call();
-
-        this.balance = balance
-        this.liabilities = liabilities
-        this.assets = assets
-      } catch (e) {
-        console.log(e)
-      }
-    }
-  }
 }
 </script>
