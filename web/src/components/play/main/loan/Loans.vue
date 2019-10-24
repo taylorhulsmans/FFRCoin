@@ -4,7 +4,8 @@
     <h1>Loans</h1>
     <v-row
       align="center"
-      justify="center">
+      justify="center"
+    >
       <v-col>
         <CreateLoan />
       </v-col>
@@ -19,11 +20,13 @@
 <script>
 import CreateLoan from './CreateLoan.vue';
 import LoanTable from './LoanTable.vue';
+import SignLoan from './SignLoan.vue';
 
 export default {
   components: {
     CreateLoan,
     LoanTable,
+    SignLoan,
   },
   data() {
     return {

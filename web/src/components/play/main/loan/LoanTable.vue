@@ -1,10 +1,83 @@
 <template>
-  <div>
-  </div>
+  <v-card>
+    <v-card-title>
+      <v-text-field
+        v-model="search"
+        append-icon="search"
+        label="Search"
+        single-line
+        hide-details
+      ></v-text-field>
+    </v-card-title>
+    <v-data-table
+      :headers="headers"
+      :items="loans"
+      :search="search"
+    >
+      <template v-slot:item.isApproved="{ item }">
+        <v-chip
+          :color="getColor(item.isApproved)"
+          dark
+          text-color="black"
+        >
+          {{
+            item.isApproved ?
+              'Approved':
+              'Unapproved'
+          }}
+        </v-chip>
+      </template>
+    </v-data-table>
+  </v-card>
 </template>
 <script>
+import * as FFService from '../../../../shared/FFService';
+
 export default {
   data: () => ({
-
-  })
-}
+    search: '',
+    headers: [
+      {
+        text: 'Type',
+        align: 'left',
+        filterable: true,
+        value: 'isApproved',
+      },
+      {
+        text: 'Debtor',
+        align: 'left',
+        filterable: true,
+        value: 'debtor',
+      },
+      {
+        text: 'Amount',
+        align: 'left',
+        filterable: true,
+        value: 'amount',
+      },
+      {
+        text: 'Date',
+        align: 'left',
+        filterable: true,
+        value: 'expiry',
+      },
+      {
+        text: 'Action',
+        align: 'left',
+        filterable: true,
+        value: 'actions',
+      },
+    ],
+    loans: [],
+  }),
+  async created() {
+    this.loans = await FFService.getLoans();
+  },
+  methods: {
+    getColor (isApproved) {
+      if (isApproved) return 'green';
+      return 'yellow';
+    }
+  }
+};
+</script>

@@ -45,3 +45,32 @@ export async function offerLoan(sender, address, amount, posixDate) {
     return e;
   }
 }
+
+export async function getLoans() {
+  const address = await addresses()
+  const contract = await getContract();
+  const loanOfferEvents = await contract.getPastEvents('loanOffer', {
+    filter: {
+      _lendor: address[0],
+    },
+    fromBlock: '0',
+    toBlock: 'latest',
+  }, (err, result) => {
+    return result
+  })
+  const loans = loanOfferEvents.map(async (event) => {
+    const debtor = event.returnValues._debtor;
+    const index = event.returnValues._index;
+    const result = await contract.methods.getLoan(address[0], debtor, index).call()
+    return {
+      debtor,
+      amount: result[0],
+      expiry: result[1],
+      isApproved: result[2],
+    }
+  })
+  return Promise.all(loans).then((completed) => {
+    
+    return completed;
+  });
+}
