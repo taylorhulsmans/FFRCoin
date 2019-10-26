@@ -9,7 +9,7 @@ tmux new-session -s $SESSIONNAME \; \
 	split-window -h \; \
 	send-keys "cd api && npm run serve" C-m \;\
 	split-window -h \; \
-	send-keys "ganache-cli -m ${MEMNONIC}" C-m \; \
+	send-keys "ganache-cli -b 3 -m ${MEMNONIC}" C-m \; \
 
 
 

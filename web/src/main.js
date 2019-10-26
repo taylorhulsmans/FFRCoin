@@ -19,7 +19,7 @@ window.addEventListener('load', () => {
 })
 
 Vue.config.productionTip = false;
-
+Vue.prototype.$vueEventBus = new Vue();
 new Vue({
   vuetify,
   router,

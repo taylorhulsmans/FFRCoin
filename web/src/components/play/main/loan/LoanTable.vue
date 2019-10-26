@@ -35,6 +35,7 @@ import * as FFService from '../../../../shared/FFService';
 
 export default {
   data: () => ({
+    newLoanMining: false,
     search: '',
     headers: [
       {
@@ -71,12 +72,28 @@ export default {
     loans: [],
   }),
   async created() {
+    this.$vueEventBus.$on('new-loan-confirmed', this.updateRow)
     this.loans = await FFService.getLoans();
+  },
+  beforeDestroy() {
+    this.$vueEventBus.$off('new-loan-confirmed')
   },
   methods: {
     getColor (isApproved) {
       if (isApproved) return 'green';
       return 'yellow';
+    },
+    async updateRow(event) {
+      console.log(event)
+      this.newLoanMining = false
+      this.loans.push({
+        isApproved: false,
+        debtor: event.offerLoan.events.loanOffer.returnValues._debtor,
+        amount: event.amount,
+        expiry: event.date,
+
+      })
+
     }
   }
 };

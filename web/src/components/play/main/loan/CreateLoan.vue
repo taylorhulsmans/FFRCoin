@@ -51,7 +51,15 @@
         </v-col>
       </v-row>
     </v-container>
-    <v-btn class="mr-4" @click="offerLoan">submit</v-btn>
+    <v-btn class="mr-4" @click="offerLoan">
+      <v-progress-circular
+        v-if="mining"
+        indeterminate
+        color="amber"
+      >
+      </v-progress-circular>
+      <p v-if="!mining">Submit</p>
+    </v-btn>
     <v-snackbar
       v-model="alert"
       top
@@ -81,19 +89,28 @@ export default {
     menu: false,
     //
     alert: false,
+    mining: false,
 
   }),
   methods: {
     async offerLoan() {
       if (this.valid) {
+        this.mining = true;
+        const date = (this.date / 1000).toFixed(0)
+        this.$vueEventBus.$emit('new-loan-mining', {
+          address: this.address,
+          amount: this.amount,
+          date
+        })
         const addresses = await FFService.addresses()
         const offerLoan = await FFService.offerLoan(
           addresses[0],
           this.address,
           this.amount,
-          (this.date / 1000).toFixed(0),
+          date,
         );
-        console.log(offerLoan)
+        this.$vueEventBus.$emit('new-loan-confirmed', {offerLoan, date, amount:this.amount})
+        this.mining = false
       } else {
         this.alert = true
       }
