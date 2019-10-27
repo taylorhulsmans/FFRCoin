@@ -65,7 +65,7 @@ export async function getLoans() {
     return {
       debtor,
       amount: result[0],
-      expiry: result[1],
+      expiry: new Date(result[1]*1000).toISOString().substr(0,10),
       isApproved: result[2],
     }
   })

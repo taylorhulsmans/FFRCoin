@@ -109,7 +109,7 @@ export default {
           this.amount,
           date,
         );
-        this.$vueEventBus.$emit('new-loan-confirmed', {offerLoan, date, amount:this.amount})
+        this.$vueEventBus.$emit('new-loan-confirmed', {offerLoan, date:this.date, amount:this.amount})
         this.mining = false
       } else {
         this.alert = true
