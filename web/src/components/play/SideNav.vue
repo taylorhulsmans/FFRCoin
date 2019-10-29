@@ -49,7 +49,7 @@ export default {
         {
           title: 'My Debts',
           icon: 'mdi-arrow-expand-down',
-          component: 'Debt',
+          component: 'Debts',
         },
         {
           title: 'Starred',

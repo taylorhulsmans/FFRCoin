@@ -56,6 +56,9 @@ export async function getLoans() {
     fromBlock: '0',
     toBlock: 'latest',
   }, (err, result) => {
+    if (err) {
+      return err
+    }
     return result
   })
   const loans = loanOfferEvents.map(async (event) => {
@@ -75,4 +78,61 @@ export async function getLoans() {
   });
 }
 
+export async function getDebts() {
+  const address = await addresses()
+  const contract = await getContract();
+  const loanOfferEvents = await contract.getPastEvents('loanOffer', {
+    filter: {
+      _debtor: address[0],
+    },
+    fromBlock: '0',
+    toBlock: 'latest',
+  }, (err, result) => {
+    return result
+  })
+  console.log(loanOfferEvents)
+  const signLoanEvents = await contract.getPastEvents('loanSign', {
+    filter: {
+      _debtor: address[0]
+    },
+    fromBlock: '0',
+    toBlock: 'latest',
+  }, (err, result) => {
+    if (err) {
+      return err
+    } else {
+      return result;
+    }
+  })
+  console.log(signLoanEvents)
+  const loans = loanOfferEvents.map(async (event) => {
+    const debtor = event.returnValues._debtor;
+    const lendor = event.returnValues._lendor;
+    const index = event.returnValues._index;
+    const result = await contract.methods.getLoan(lendor, address[0], index).call()
+    const isApproved = signLoanEvents.some((signedLoan) => {
+      return signedLoan.returnValues._index == index &&
+        signedLoan.returnValues._debtor == debtor 
+    })
+    console.log(isApproved)
+    return {
+      lendor,
+      index,
+      amount: result[0],
+      expiry: new Date(result[1]*1000).toISOString().substr(0,10),
+      isApproved,
+    }
+  })
 
+  return Promise.all(loans).then((completed) => {
+    
+    return completed;
+  });
+}
+
+export async function signLoan(lendor, index) {
+  const address = await addresses()
+  const contract = await getContract();
+  const signLoan = await contract.methods.signLoan(lendor, index).send({from: address[0]})
+  console.log(signLoan)
+}

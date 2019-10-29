@@ -16,6 +16,7 @@
 import TopNav from '../../components/TopNav.vue';
 import SideNav from '../../components/play/SideNav.vue';
 import Loans from '../../components/play/main/loan/Loans.vue';
+import Debts from '../../components/play/main/debt/Debts.vue';
 import Dashboard from '../../components/play/main/Dashboard.vue';
 
 export default {
@@ -24,6 +25,7 @@ export default {
     SideNav,
     Dashboard,
     Loans,
+    Debts,
 
   },
 
