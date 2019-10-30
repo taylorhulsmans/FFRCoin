@@ -90,7 +90,6 @@ export async function getDebts() {
   }, (err, result) => {
     return result
   })
-  console.log(loanOfferEvents)
   const signLoanEvents = await contract.getPastEvents('loanSign', {
     filter: {
       _debtor: address[0]
@@ -104,7 +103,6 @@ export async function getDebts() {
       return result;
     }
   })
-  console.log(signLoanEvents)
   const loans = loanOfferEvents.map(async (event) => {
     const debtor = event.returnValues._debtor;
     const lendor = event.returnValues._lendor;
@@ -114,7 +112,6 @@ export async function getDebts() {
       return signedLoan.returnValues._index == index &&
         signedLoan.returnValues._debtor == debtor 
     })
-    console.log(isApproved)
     return {
       lendor,
       index,
@@ -138,5 +135,16 @@ export async function signLoan(lendor, index) {
     return event
   } catch (e) {
     return e
+  }
+}
+
+export async function repayLoan(lendor, index) {
+  const address = await addresses();
+  const contract = await getContract();
+  try {
+    const event = await contract.methods.repayLoan(lendor, index).send({ from: address[0] });
+    return event;
+  } catch (e) {
+    return e;
   }
 }

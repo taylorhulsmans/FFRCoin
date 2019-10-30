@@ -16,6 +16,7 @@
     >
       <template v-slot:item.isApproved="{ item }">
         <v-chip
+          v-if="item.amount > 0"
           :color="getColor(item.isApproved)"
           dark
           text-color="black"
@@ -25,6 +26,13 @@
               'Approved':
               'Unapproved'
           }}
+        </v-chip>
+        <v-chip
+          v-else
+          color="blue"
+          dark
+        >
+        Repaid
         </v-chip>
       </template>
 
@@ -39,8 +47,13 @@
           indeterminate
           color="amber"
         >
-      </v-progress-circular>
-
+        </v-progress-circular>
+        <v-icon
+          v-if="item.isApproved && !item.isMining && item.amount > 0"
+          @click="repayLoan(item)"
+        >
+        mdi-cash-refund
+        </v-icon>
       </template>
     </v-data-table>
   </v-card>
@@ -94,7 +107,6 @@ export default {
       debt.isMining = false;
       return debt
     })
-    console.log(this.debts, 'created')
   },
   beforeDestroy() {
     this.$vueEventBus.$off('new-debt-confirmed')
@@ -105,7 +117,6 @@ export default {
       return 'yellow';
     },
     async updateRow(event) {
-      console.log(event)
     },
     async signLoan(item) {
       this.$vueEventBus.$emit('sign-loan-mining')
@@ -121,7 +132,6 @@ export default {
       iDebt.isMining = true
       this.$set(this.debts, debtIndexForSet, iDebt)
       const signLoan = await FFService.signLoan(item.lendor, item.index)
-      console.log(signLoan)
       if (!signLoan.transactionHash) {
         iDebt.isMining = false
         this.$set(this.debts, debtIndexForSet, iDebt)  
@@ -134,7 +144,34 @@ export default {
           item
         })
       }
-    }
-  }
+    },
+    async repayLoan(item) {
+      let itemIterator = null;
+      this.debts.find((debt, i) => {
+        if (debt.index === item.index && debt.lendor === item.lendor) {
+          itemIterator = i
+          return true
+        }
+        return false
+      })
+      let iDebt = this.debts[itemIterator]
+      iDebt.isMining = true
+      this.$set(this.debts, itemIterator, iDebt)
+      const repayLoan = await FFService.repayLoan(item.lendor, item.index)
+      if (!repayLoan.transactionHash) {
+        iDebt.isMining = false
+        this.$set(this.debts, itemIterator, iDebt)
+      } else {
+        this.$vueEventBus.$emit('repay-loan-mined', {amount: item.amount})
+        iDebt.isMining = false
+        iDebt.amount = 0
+        this.$set(this.debts, itemIterator, iDebt)
+      }
+
+
+
+      
+    },
+  },
 };
 </script>

@@ -12,7 +12,6 @@
         dense
       >
         <v-list-item-group
-          v-model="model"
           :multiple="multiple"
         >
           <v-list-item
