@@ -24,9 +24,9 @@ export async function addresses() {
 export async function getAccount(address) {
   const contract = await getContract();
   try {
-    const balance = await contract.methods.balanceOf(address).call();
-    const liabilities = await contract.methods.liabilitiesOf(address).call();
-    const assets = await contract.methods.assetsOf(address).call();
+    const balance = Number(await contract.methods.balanceOf(address).call());
+    const liabilities = Number(await contract.methods.liabilitiesOf(address).call());
+    const assets = Number(await contract.methods.assetsOf(address).call());
     return {
       balance,
       liabilities,
@@ -133,6 +133,10 @@ export async function getDebts() {
 export async function signLoan(lendor, index) {
   const address = await addresses()
   const contract = await getContract();
-  const signLoan = await contract.methods.signLoan(lendor, index).send({from: address[0]})
-  console.log(signLoan)
+  try {
+    const event = await contract.methods.signLoan(lendor, index).send({ from: address[0] })
+    return event
+  } catch (e) {
+    return e
+  }
 }

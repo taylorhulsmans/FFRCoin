@@ -20,13 +20,11 @@
 <script>
 import CreateLoan from './CreateLoan.vue';
 import LoanTable from './LoanTable.vue';
-import SignLoan from './SignLoan.vue';
 
 export default {
   components: {
     CreateLoan,
     LoanTable,
-    SignLoan,
   },
   data() {
     return {

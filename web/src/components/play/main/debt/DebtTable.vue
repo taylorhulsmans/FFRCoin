@@ -30,10 +30,17 @@
 
       <template v-slot:item.actions="{ item }">
         <v-icon
-          v-if="!item.isApproved"
-          @click="signLoan(item.lendor, item.index)">
+          v-if="!item.isApproved && !item.isMining"
+          @click="signLoan(item)">
           mdi-pencil
         </v-icon>
+        <v-progress-circular
+          v-if="item.isMining"
+          indeterminate
+          color="amber"
+        >
+      </v-progress-circular>
+
       </template>
     </v-data-table>
   </v-card>
@@ -43,7 +50,7 @@ import * as FFService from '../../../../shared/FFService';
 
 export default {
   data: () => ({
-    newDebtMining: false,
+    signLoanMining: false,
     search: '',
     headers: [
       {
@@ -80,8 +87,13 @@ export default {
     debts: [],
   }),
   async created() {
-    this.$vueEventBus.$on('new-debt-confirmed', this.updateRow)
+    this.$vueEventBus.$on('sign-loan-mining', this.updateRow)
+    this.$vueEventBus.$on('sign-loan-mined', this.updateRow)
     this.debts = await FFService.getDebts();
+    this.debts = this.debts.map((debt) => {
+      debt.isMining = false;
+      return debt
+    })
     console.log(this.debts, 'created')
   },
   beforeDestroy() {
@@ -94,18 +106,34 @@ export default {
     },
     async updateRow(event) {
       console.log(event)
-      this.newDebtMining = false
-      this.debts.push({
-        isApproved: false,
-        debtor: event.offerDebt.events.debtOffer.returnValues._debtor,
-        amount: event.amount,
-        expiry: event.date,
-
-      })
-
     },
-    async signLoan(lendor, index) {
-      return FFService.signLoan(lendor, index)
+    async signLoan(item) {
+      this.$vueEventBus.$emit('sign-loan-mining')
+      let debtIndexForSet = null
+      let state = this.debts.find((debt, i) => {
+        if (debt.index === item.index && debt.lendor === item.lendor) {
+          debtIndexForSet = i
+          return true
+        }
+        return false
+      })
+      let iDebt = this.debts[debtIndexForSet]
+      iDebt.isMining = true
+      this.$set(this.debts, debtIndexForSet, iDebt)
+      const signLoan = await FFService.signLoan(item.lendor, item.index)
+      console.log(signLoan)
+      if (!signLoan.transactionHash) {
+        iDebt.isMining = false
+        this.$set(this.debts, debtIndexForSet, iDebt)  
+      } else {
+        iDebt.isMining = false
+        iDebt.isApproved = true
+        this.$set(this.debts, debtIndexForSet, iDebt)
+        this.$vueEventBus.$emit('sign-loan-mined', {
+          amount: item.amount,
+          item
+        })
+      }
     }
   }
 };

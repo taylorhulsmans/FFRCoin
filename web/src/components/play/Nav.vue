@@ -63,9 +63,17 @@ export default {
     };
   },
   async created() {
+    this.$vueEventBus.$on('sign-loan-mined', this.signLoanChange)
     this.contract = await FFService.getContract();
     this.addresses = await FFService.addresses();
     this.account = await FFService.getAccount(this.addresses[0]);
+  },
+  methods: {
+    signLoanChange(event) {
+      console.log(event)
+      this.account.balance += Number(event.amount);
+      this.account.liabilities += Number(event.amount);
+    }
   },
 }
 </script>
