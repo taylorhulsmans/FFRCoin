@@ -43,8 +43,10 @@ contract FiatFrenzy is IFiatFrenzy {
   
   struct Loan {
     uint256 _principle;
-    uint256 _time;
+		uint256 _expiry;
     bool _isApproved;
+    uint256 _createdAt;
+    uint256 _signedAt;
   }
   // _loans[lendor][debtor]
   mapping (address => mapping (address => Loan[])) _loans;
@@ -85,6 +87,24 @@ contract FiatFrenzy is IFiatFrenzy {
     _;
   }
 
+
+  function timeAdjustedRR(
+    uint256 expiryDate
+  ) public view returns(uint256) {
+		// higher numbers further in time
+    uint256 lengthOfTimeInS = expiryDate - now;
+    uint256 dayInS = 3600*24;
+		// i believe this floors, is this satisfactory on the edge?
+    uint256 daysTillExpiry = lengthOfTimeInS / dayInS;
+		uint256 not = 1000000000;
+		
+		if (daysTillExpiry < 365) {
+      uint256 increment = _reserveRequirement / 365;
+      return daysTillExpiry*increment;
+    }
+    return _reserveRequirement;
+  }
+
   modifier isWithinReserveRatio(
     address lendor,
     uint256 amount
@@ -93,7 +113,18 @@ contract FiatFrenzy is IFiatFrenzy {
     uint256 currentRatio = Helpers.percent(account._liabilities + amount, account._balance, 9);
     require(currentRatio <= _reserveRequirement, "apologies, reserve requirement exceeded");
     _;
-  } 
+  }
+
+  modifier isLoanOfferWithinReserveRatio(
+    address lendor,
+    uint256 amount,
+		uint256 expiry
+  ) {
+    Account memory account = _accounts[lendor];
+    uint256 currentRatio = Helpers.percent(account._liabilities + amount, account._balance, 9);
+    require(currentRatio <= timeAdjustedRR(expiry), "apologies, reserve requirement exceeded");
+    _;
+  }
 
   constructor(
     address[] memory defaultOperators
@@ -101,14 +132,13 @@ contract FiatFrenzy is IFiatFrenzy {
     _name = "Fiat Frenzy";
     _symbol = "FRNZY";
     _granularity = 1;
-
     _reserveRequirement = Helpers.percent(17167680177565, 27777890035288, 9);
     _defaultOperators = defaultOperators;
     for (uint256 i = 0; i < _defaultOperators.length; i++) {
       _isDefaultOperator[_defaultOperators[i]] = true;
     }
-		// some test coins, remove for prod
-		_accounts[msg.sender]._balance = 100;
+    // some test coins, remove for prod
+    _accounts[msg.sender]._balance = 100;
 
   }
 
@@ -124,6 +154,7 @@ contract FiatFrenzy is IFiatFrenzy {
     return _reserveRequirement;
   }
 
+  
   function totalSupply() external view returns (uint256) {
     return _totalSupply;
   }
@@ -212,11 +243,18 @@ contract FiatFrenzy is IFiatFrenzy {
 
   function offerLoan(
     address debtor,
-    uint256 amount
+    uint256 amount,
+		uint256 expiry
   ) isMultipleOf(amount)
-    isWithinReserveRatio(msg.sender, amount)
+    isLoanOfferWithinReserveRatio(
+			msg.sender,
+		 	amount,
+			expiry
+		)
   external {
-    Loan memory newLoan = Loan(amount, now, false);
+		// minimum day
+		require((expiry - now) > 3600*24, 'loans must be at least a 24h');
+    Loan memory newLoan = Loan(amount, expiry, false, now, 0);
     // _loans[lendor][debtor]
     _loans[msg.sender][debtor].push(newLoan);
     uint256 index = _loans[msg.sender][debtor].length;
@@ -239,7 +277,7 @@ contract FiatFrenzy is IFiatFrenzy {
     uint256 index
   ) external view returns (uint256, uint256, bool) {
     Loan memory loan =  _loans[lendor][debtor][index - 1];  
-    return (loan._principle, loan._time, loan._isApproved);
+    return (loan._principle, loan._createdAt, loan._isApproved);
   }
 
   function signLoan(
@@ -261,6 +299,7 @@ contract FiatFrenzy is IFiatFrenzy {
     lendorAccount._assets += loan._principle;
     
     loan._isApproved = true;
+    loan._signedAt = now; 
 
     emit loanSign(lendor, index, msg.sender);
   }
@@ -274,10 +313,13 @@ contract FiatFrenzy is IFiatFrenzy {
   function repayLoan(
     address lendor,
     uint256 index
-  ) external {
+	) 
+	external {
     Loan storage loan = _loans[lendor][msg.sender][index - 1];
+		require(now >= loan._expiry, 'loans must be expired before they are repaid');
     Account storage debtorAccount = _accounts[msg.sender];
     Account storage lendorAccount = _accounts[lendor];
+
     _send(lendor, msg.sender, loan._principle);
     
     debtorAccount._liabilities -= loan._principle;

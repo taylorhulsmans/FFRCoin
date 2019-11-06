@@ -37,7 +37,7 @@ contract("FiatFrenzy", async (accounts) => {
 
 	it("should return balance of", async () => {
 		let balanceOf = await instance.balanceOf.call(accounts[0]);
-		assert.equal(0, balanceOf)
+		assert.equal(100, Number(balanceOf))
 	})
 
 	it("should return granularity", async () => {
@@ -48,6 +48,31 @@ contract("FiatFrenzy", async (accounts) => {
 	it("should return default operator", async () => {
 		let defaultOps = await instance.defaultOperators.call();
 		assert.equal(accounts[1], defaultOps)
+	})
+
+	it("should give correct time adjusted RR at a year equal to reserve ratio", async () => {
+		let tarr = await instance.timeAdjustedRR.call(
+			Math.floor((new Date().getTime() / 1000)) + (60*60*24*365
+			))
+		let rr= await instance.reserveRequirement.call()
+		console.log('1 tarr', Number(tarr), 'rr', Number(rr))
+		assert.equal(Number(tarr), Number(rr))
+	})
+
+	it("should give correct time adjusted RR at a 1/2 year is half", async () => {
+		let tarr = await instance.timeAdjustedRR.call(
+			Math.floor((new Date().getTime() / 1000)) + (60*60*24*(365/2
+			)))
+		let rr= await instance.reserveRequirement.call()
+		console.log('1 tarr', Number(tarr), 'rr', Number(rr))
+		assert.equal(Number(tarr), 308170226)
+	})
+
+	it("lending should feel restricted for short loans", async () => {
+		let tarr = await instance.timeAdjustedRR.call(
+			Math.floor((new Date().getTime() / 1000)) + (3600*24))
+		console.log('2 tarr', Number(tarr), 'rr')
+		assert.equal(Number(tarr), 1693243)
 	})
 
 	it("should return if operator or not", async () => {
@@ -95,7 +120,7 @@ contract("FiatFrenzy", async (accounts) => {
   it("accounts[1] is the only one who can mint tokens", async () => {
     let mint = await instance.operatorMint.sendTransaction(accounts[0], 100, {from: accounts[1]})
     let balanceOf = await instance.balanceOf.call(accounts[0]);
-    assert.equal(balanceOf, 100)
+    assert.equal(Number(balanceOf), 200)
     try {
       let mintHack = await instance.operatorMint.sendTransaction(accounts[0], 100)
     } catch (e) {
@@ -107,12 +132,13 @@ contract("FiatFrenzy", async (accounts) => {
     let send = await instance.send.sendTransaction(accounts[2], 50, '0xff');
     let balance0 = await instance.balanceOf.call(accounts[0])
     let balance2 = await instance.balanceOf.call(accounts[2])
-    assert.equal(balance0, 50)
+    assert.equal(Number(balance0), 150)
     assert.equal(balance2, 50)
   });
 
-  it("can offer a loan", async () => {
-    let offerLoan = await instance.offerLoan.sendTransaction(accounts[3], 10, {from: accounts[2]})
+	it("can offer a loan", async () => {
+		const now = new Date().getTime() / 1000
+    let offerLoan = await instance.offerLoan.sendTransaction(accounts[3], 10, Math.floor(now*3601*24), {from: accounts[2]})
     let index = await instance.getLoanIndex.call(accounts[2], accounts[3])
     assert.equal(index, 1);
   })
@@ -139,7 +165,7 @@ contract("FiatFrenzy", async (accounts) => {
 		console.log(balance, liabilities, assets)
 		
 		try {
-			let offerLoan = await instance.offerLoan.sendTransaction(accounts[3], 20, {from: accounts[2]});
+			let offerLoan = await instance.offerLoan.sendTransaction(accounts[3], 20, 3600*24, {from: accounts[2]});
 		} catch (e) {
 			assert.fail(e)
 		}
@@ -189,5 +215,7 @@ contract("FiatFrenzy", async (accounts) => {
 		assert.equal(liabilities3.toNumber(), 30 - 10)
 		assert.equal(assets3.toNumber(), 0)
 	})
+
+
 
 })

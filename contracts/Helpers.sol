@@ -14,4 +14,9 @@ library Helpers {
 		uint _quotient =  ((_numerator / denominator) + 5) / 10;
 		return ( _quotient);
 	}
+
+	// the reserve requirement, phi - 1 or (1 / phi),
+	// will be amalgamated into the annum interest
+	// Loan prepayment will be functionally tapered to the annum
+	// so that only 1
 }

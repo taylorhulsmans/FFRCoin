@@ -1,19 +1,16 @@
 <template>
   <div>
     <v-toolbar dense>
-      <v-toolbar-title>
-        Dashboard
-      </v-toolbar-title>
 
       <v-chip
         class='ma-2'
         color='green'
         >
-        <v-avatar
+        <v-chip
           left
           class="green darken-4"
           >{{account.balance}}
-        </v-avatar>
+        </v-chip>
           Balance
       </v-chip>
 
@@ -22,11 +19,11 @@
         color='yellow'
         text-color="black"
         >
-        <v-avatar
+        <v-chip
           left
           class="yellow darken-4"
           >{{account.assets}}
-        </v-avatar>
+        </v-chip>
           assets
       </v-chip>
 
@@ -35,15 +32,26 @@
         color='red'
         text-color="white"
         >
-        <v-avatar
+        <v-chip
           left
           class="red darken-4"
           >{{account.liabilities}}
-        </v-avatar>
+        </v-chip>
           Liabilities
       </v-chip>
 
-
+       <v-chip
+        class='ma-2'
+        color='blue'
+        text-color="white"
+        >
+        <v-chip
+          left
+          class="teal darken-4"
+          >{{available}}
+        </v-chip>
+          Max Lend
+      </v-chip>
     </v-toolbar>
   </div>
 </template>
@@ -60,6 +68,7 @@ export default {
         liabilities: null,
         assets: null,
       },
+      available: null,
     };
   },
   async created() {
@@ -68,6 +77,11 @@ export default {
     this.contract = await FFService.getContract();
     this.addresses = await FFService.addresses();
     this.account = await FFService.getAccount(this.addresses[0]);
+    this.available = this.calculateAvailable(
+      Number(this.account.balance),
+      Number(this.account.assets),
+      Number(this.account.liabilities),
+    )
   },
   beforeDestroy() {
     this.$vueEventBus.$off('sign-loan-mined')
@@ -82,6 +96,13 @@ export default {
       this.account.balance -= Number(event.amount);
       this.account.liabilities -= Number(event.amount);
     },
+    calculateAvailable(balance, assets, liabilities) {
+      // liabilites + x / balance = 0.0618
+      
+      Math.phi = (1 + Math.sqrt(5)) / 2
+      return Math.floor((((Math.phi - 1) * balance) - liabilities))
+
+    }
   },
 }
 </script>
