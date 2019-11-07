@@ -37,17 +37,27 @@ export async function getAccount(address) {
   }
 }
 
+export async function getTimeAdjustedRR(expiry) {
+  const contract = await getContract();
+  try {
+    return await contract.methods.timeAdjustedRR(expiry).call();
+  } catch (e) {
+    console.log(e)
+    return e;
+  }
+}
+
 export async function offerLoan(sender, address, amount, posixDate) {
   const contract = await getContract();
   try {
-    return await contract.methods.offerLoan(address, amount).send({ from: sender });
+    return await contract.methods.offerLoan(address, amount, posixDate).send({ from: sender });
   } catch (e) {
     return e;
   }
 }
 
 export async function getLoans() {
-  const address = await addresses()
+  const address = await addresses();
   const contract = await getContract();
   const loanOfferEvents = await contract.getPastEvents('loanOffer', {
     filter: {
@@ -147,4 +157,18 @@ export async function repayLoan(lendor, index) {
   } catch (e) {
     return e;
   }
+}
+
+export async function calculateAvailable(
+  expiry
+) {
+  const contract = await getContract();
+  const address = await addresses();
+  const account = await getAccount(address[0]);
+  const timeAdjustedRR = await getTimeAdjustedRR(expiry);
+  const not = 10 ** 9;
+  const decimalRatio = (timeAdjustedRR / not);
+  const val = ((decimalRatio) * account.balance) - account.liabilities
+  return val.toFixed(2)
+
 }

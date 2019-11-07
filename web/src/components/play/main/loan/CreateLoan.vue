@@ -15,6 +15,44 @@
             required
           >
           </v-text-field>
+
+           <v-menu
+              ref="menu"
+              v-model="menu"
+              :close-on-content-click="false"
+              :return-value.sync="date"
+              transition="scale-transition"
+              offset-y
+              min-width="290px"
+            >
+              <template v-slot:activator="{ on }">
+                <v-text-field
+                  v-model="date"
+                  :rules="isDate"
+                  label="Expiry Date"
+                  prepend-icon="event"
+                  readonly
+                  v-on="on"
+                ></v-text-field>
+              </template>
+              <v-date-picker v-model="date" no-title scrollable>
+                <v-spacer></v-spacer>
+                <v-btn text color="primary" @click="menu = false">Cancel</v-btn>
+                <v-btn text color="primary" @click="$refs.menu.save(date)">OK</v-btn>
+              </v-date-picker>
+            </v-menu>
+             <v-chip
+              class='ma-2'
+              color='blue'
+              text-color="white"
+              >
+              <v-chip
+                left
+                class="teal darken-4"
+                >{{maxLend}}
+              </v-chip>
+                Max Lend
+            </v-chip>
             <v-text-field
               type="number"
               v-model="amount"
@@ -23,31 +61,6 @@
               required
             >
             </v-text-field>
-             <v-menu
-                ref="menu"
-                v-model="menu"
-                :close-on-content-click="false"
-                :return-value.sync="date"
-                transition="scale-transition"
-                offset-y
-                min-width="290px"
-              >
-                <template v-slot:activator="{ on }">
-                  <v-text-field
-                    v-model="date"
-                    :rules="isDate"
-                    label="Expiry Date"
-                    prepend-icon="event"
-                    readonly
-                    v-on="on"
-                  ></v-text-field>
-                </template>
-                <v-date-picker v-model="date" no-title scrollable>
-                  <v-spacer></v-spacer>
-                  <v-btn text color="primary" @click="menu = false">Cancel</v-btn>
-                  <v-btn text color="primary" @click="$refs.menu.save(date)">OK</v-btn>
-                </v-date-picker>
-              </v-menu>
         </v-col>
       </v-row>
     </v-container>
@@ -116,5 +129,14 @@ export default {
       }
     }
   },
+  asyncComputed: {
+    async maxLend() {
+      const datePosix = new Date(this.date).getTime() / 1000;
+      const adjustedRR = await FFService.getTimeAdjustedRR(datePosix);
+      
+
+      
+    },
+  }
 };
 </script>

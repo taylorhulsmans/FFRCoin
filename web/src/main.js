@@ -1,4 +1,5 @@
 import Vue from 'vue';
+import AsyncComputed from 'vue-async-computed';
 import Web3 from 'web3';
 
 import App from './App.vue';
@@ -23,5 +24,6 @@ Vue.prototype.$vueEventBus = new Vue();
 new Vue({
   vuetify,
   router,
-  render: h => h(App)
+  AsyncComputed,
+  render: h => h(App),
 }).$mount('#app');
