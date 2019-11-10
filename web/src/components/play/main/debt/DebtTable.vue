@@ -48,8 +48,13 @@
           color="amber"
         >
         </v-progress-circular>
+
         <v-icon
-          v-if="item.isApproved && !item.isMining && item.amount > 0"
+          v-if="
+            item.isApproved &&
+            !item.isMining &&
+            item.amount > 0 &&
+            item.date > new Date()"
           @click="repayLoan(item)"
         >
         mdi-cash-refund
@@ -100,8 +105,8 @@ export default {
     debts: [],
   }),
   async created() {
-    this.$vueEventBus.$on('sign-loan-mining', this.updateRow)
-    this.$vueEventBus.$on('sign-loan-mined', this.updateRow)
+    this.$vueEventBus.$on('sign-loan-mining', this.updateRow);
+    this.$vueEventBus.$on('sign-loan-mined', this.updateRow);
     this.debts = await FFService.getDebts();
     this.debts = this.debts.map((debt) => {
       debt.isMining = false;
@@ -127,22 +132,22 @@ export default {
           return true
         }
         return false
-      })
-      let iDebt = this.debts[debtIndexForSet]
-      iDebt.isMining = true
-      this.$set(this.debts, debtIndexForSet, iDebt)
-      const signLoan = await FFService.signLoan(item.lendor, item.index)
+      });
+      const iDebt = this.debts[debtIndexForSet];
+      iDebt.isMining = true;
+      this.$set(this.debts, debtIndexForSet, iDebt);
+      const signLoan = await FFService.signLoan(item.lendor, item.index);
       if (!signLoan.transactionHash) {
-        iDebt.isMining = false
-        this.$set(this.debts, debtIndexForSet, iDebt)  
+        iDebt.isMining = false;
+        this.$set(this.debts, debtIndexForSet, iDebt);
       } else {
-        iDebt.isMining = false
-        iDebt.isApproved = true
-        this.$set(this.debts, debtIndexForSet, iDebt)
+        iDebt.isMining = false;
+        iDebt.isApproved = true;
+        this.$set(this.debts, debtIndexForSet, iDebt);
         this.$vueEventBus.$emit('sign-loan-mined', {
           amount: item.amount,
-          item
-        })
+          item,
+        });
       }
     },
     async repayLoan(item) {

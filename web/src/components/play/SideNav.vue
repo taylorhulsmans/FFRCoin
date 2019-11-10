@@ -41,6 +41,11 @@ export default {
           component: 'Dashboard',
         },
         {
+          title: 'Mint with Memes',
+          icon: 'mdi-auto-fix',
+          component: 'Mint',
+        },
+        {
           title: 'My Loans',
           icon: 'mdi-arrow-expand-up',
           component: 'Loans',

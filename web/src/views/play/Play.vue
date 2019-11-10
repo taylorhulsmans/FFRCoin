@@ -18,6 +18,7 @@ import SideNav from '../../components/play/SideNav.vue';
 import Loans from '../../components/play/main/loan/Loans.vue';
 import Debts from '../../components/play/main/debt/Debts.vue';
 import Dashboard from '../../components/play/main/Dashboard.vue';
+import Mint from '../../components/play/main/mint/Mint.vue';
 
 export default {
   components: {
@@ -26,6 +27,7 @@ export default {
     Dashboard,
     Loans,
     Debts,
+    Mint,
 
   },
 

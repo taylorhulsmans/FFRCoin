@@ -117,7 +117,7 @@ contract("FiatFrenzy", async (accounts) => {
 		assert.equal(false, zeroOpTwo)
 	})
 
-  it("accounts[1] is the only one who can mint tokens", async () => {
+	it("accounts[1] is the only one who can mint tokens", async () => {
     let mint = await instance.operatorMint.sendTransaction(accounts[0], 100, {from: accounts[1]})
     let balanceOf = await instance.balanceOf.call(accounts[0]);
     assert.equal(Number(balanceOf), 200)
@@ -141,6 +141,13 @@ contract("FiatFrenzy", async (accounts) => {
     let offerLoan = await instance.offerLoan.sendTransaction(accounts[3], 10, Math.floor(now*3601*24), {from: accounts[2]})
     let index = await instance.getLoanIndex.call(accounts[2], accounts[3])
     assert.equal(index, 1);
+  })
+
+	it("can offer a loan that isn't whole number", async () => {
+		const now = new Date().getTime() / 1000
+    let offerLoan = await instance.offerLoan.sendTransaction(accounts[3], String(10.1), Math.floor(now*3601*24), {from: accounts[2]})
+    let index = await instance.getLoanIndex.call(accounts[2], accounts[3])
+    assert.equal(index, 2);
   })
 
   it("can sign a loan", async () => {

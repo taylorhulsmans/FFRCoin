@@ -1,18 +1,17 @@
 const express = require('express')
 const router = express.Router()
+import axios from 'axios'
 //accounts/
 module.exports = (web3) => {
-	router.get('/', async (req, res) => {
-		const loans = [];
-		
-		
-		res.json({
-			message: '',
-			data: {
-				loans,
-			}
-		})
-	})
+  router.post('/', async (req, res) => {
+    
 
-	return router
+    res.json({
+      message: '',
+      data: {
+      }
+    })
+  })
+
+  return router
 }

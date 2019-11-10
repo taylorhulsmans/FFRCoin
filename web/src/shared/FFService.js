@@ -37,10 +37,15 @@ export async function getAccount(address) {
   }
 }
 
+export async function proveMemeAndMint(thread, post) {
+  //let 4chRes = await axios.get('')
+}
+
 export async function getTimeAdjustedRR(expiry) {
   const contract = await getContract();
   try {
-    return await contract.methods.timeAdjustedRR(expiry).call();
+    const adjustedRR = await contract.methods.timeAdjustedRR(expiry).call();
+    return adjustedRR;
   } catch (e) {
     console.log(e)
     return e;
@@ -50,7 +55,7 @@ export async function getTimeAdjustedRR(expiry) {
 export async function offerLoan(sender, address, amount, posixDate) {
   const contract = await getContract();
   try {
-    return await contract.methods.offerLoan(address, amount, posixDate).send({ from: sender });
+    return await contract.methods.offerLoan(address, Number(amount), posixDate).send({ from: sender });
   } catch (e) {
     return e;
   }
@@ -162,13 +167,13 @@ export async function repayLoan(lendor, index) {
 export async function calculateAvailable(
   expiry
 ) {
-  const contract = await getContract();
   const address = await addresses();
   const account = await getAccount(address[0]);
   const timeAdjustedRR = await getTimeAdjustedRR(expiry);
+  console.log('hmm')
   const not = 10 ** 9;
   const decimalRatio = (timeAdjustedRR / not);
   const val = ((decimalRatio) * account.balance) - account.liabilities
-  return val.toFixed(2)
+  return Math.floor(val)
 
 }

@@ -20,7 +20,6 @@
               ref="menu"
               v-model="menu"
               :close-on-content-click="false"
-              :return-value.sync="date"
               transition="scale-transition"
               offset-y
               min-width="290px"
@@ -35,10 +34,17 @@
                   v-on="on"
                 ></v-text-field>
               </template>
-              <v-date-picker v-model="date" no-title scrollable>
+              <v-date-picker v-model="date"
+                no-title
+                scrollable
+                actions     
+                >
                 <v-spacer></v-spacer>
                 <v-btn text color="primary" @click="menu = false">Cancel</v-btn>
-                <v-btn text color="primary" @click="$refs.menu.save(date)">OK</v-btn>
+          <v-btn text color="primary" @click="
+            $refs.menu.save(date);
+            calcMaxLendForDate(date);
+            ">OK</v-btn>
               </v-date-picker>
             </v-menu>
              <v-chip
@@ -94,6 +100,7 @@ export default {
     amount: 0,
     isAmount: [
       v => !!v || 'An amount to loan is required',
+      v => v % 1 == 0 || 'whole numbers only please'
     ],
     date: new Date().toISOString().substr(0, 10),
     isDate: [
@@ -103,13 +110,14 @@ export default {
     //
     alert: false,
     mining: false,
+    maxLend: null,
 
   }),
   methods: {
     async offerLoan() {
       if (this.valid) {
         this.mining = true;
-        const date = (this.date / 1000).toFixed(0)
+        const date = Math.floor(new Date(this.date).getTime() / 1000)
         this.$vueEventBus.$emit('new-loan-mining', {
           address: this.address,
           amount: this.amount,
@@ -127,16 +135,13 @@ export default {
       } else {
         this.alert = true
       }
+    },
+    async calcMaxLendForDate(date) {
+      this.date = date
+      const todayPosix = new Date().getTime() / 1000;
+      const datePosix = Math.floor(new Date(date).getTime() / 1000);
+      this.maxLend = await FFService.calculateAvailable(datePosix);
     }
   },
-  asyncComputed: {
-    async maxLend() {
-      const datePosix = new Date(this.date).getTime() / 1000;
-      const adjustedRR = await FFService.getTimeAdjustedRR(datePosix);
-      
-
-      
-    },
-  }
 };
 </script>

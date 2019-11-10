@@ -1,6 +1,8 @@
 <template>
   <div>
-    <v-toolbar dense>
+    <v-toolbar
+      style="overflow-x:scroll"
+      dense>
       
       <v-btn
         to="/">
@@ -85,3 +87,10 @@ export default {
   },
 };
 </script>
+<style>
+::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+  background: transparent;
+}
+</style>

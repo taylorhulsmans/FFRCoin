@@ -1,6 +1,7 @@
 pragma solidity 0.5.8;
 import { IFiatFrenzy } from './IFiatFrenzy.sol';
 import './Helpers.sol';
+
 contract FiatFrenzy is IFiatFrenzy {
   // Coin Meta
   string internal _name;
@@ -43,7 +44,7 @@ contract FiatFrenzy is IFiatFrenzy {
   
   struct Loan {
     uint256 _principle;
-		uint256 _expiry;
+    uint256 _expiry;
     bool _isApproved;
     uint256 _createdAt;
     uint256 _signedAt;
@@ -91,14 +92,14 @@ contract FiatFrenzy is IFiatFrenzy {
   function timeAdjustedRR(
     uint256 expiryDate
   ) public view returns(uint256) {
-		// higher numbers further in time
+    // higher numbers further in time
     uint256 lengthOfTimeInS = expiryDate - now;
     uint256 dayInS = 3600*24;
-		// i believe this floors, is this satisfactory on the edge?
+    // i believe this floors, is this satisfactory on the edge?
     uint256 daysTillExpiry = lengthOfTimeInS / dayInS;
-		uint256 not = 1000000000;
-		
-		if (daysTillExpiry < 365) {
+    uint256 not = 1000000000;
+    
+    if (daysTillExpiry < 365) {
       uint256 increment = _reserveRequirement / 365;
       return daysTillExpiry*increment;
     }
@@ -118,7 +119,7 @@ contract FiatFrenzy is IFiatFrenzy {
   modifier isLoanOfferWithinReserveRatio(
     address lendor,
     uint256 amount,
-		uint256 expiry
+    uint256 expiry
   ) {
     Account memory account = _accounts[lendor];
     uint256 currentRatio = Helpers.percent(account._liabilities + amount, account._balance, 9);
@@ -141,7 +142,7 @@ contract FiatFrenzy is IFiatFrenzy {
     _accounts[msg.sender]._balance = 100;
 
   }
-
+  
   function name() external view returns (string memory) {
     return _name;
   }
@@ -244,16 +245,16 @@ contract FiatFrenzy is IFiatFrenzy {
   function offerLoan(
     address debtor,
     uint256 amount,
-		uint256 expiry
+    uint256 expiry
   ) isMultipleOf(amount)
     isLoanOfferWithinReserveRatio(
-			msg.sender,
-		 	amount,
-			expiry
-		)
+      msg.sender,
+      amount,
+      expiry
+    )
   external {
-		// minimum day
-		require((expiry - now) > 3600*24, 'loans must be at least a 24h');
+    // minimum day
+    require((expiry - now) > 3600*24, 'loans must be at least a 24h');
     Loan memory newLoan = Loan(amount, expiry, false, now, 0);
     // _loans[lendor][debtor]
     _loans[msg.sender][debtor].push(newLoan);
@@ -313,10 +314,10 @@ contract FiatFrenzy is IFiatFrenzy {
   function repayLoan(
     address lendor,
     uint256 index
-	) 
-	external {
+  ) 
+  external {
     Loan storage loan = _loans[lendor][msg.sender][index - 1];
-		require(now >= loan._expiry, 'loans must be expired before they are repaid');
+    require(now >= loan._expiry, 'loans must be expired before they are repaid');
     Account storage debtorAccount = _accounts[msg.sender];
     Account storage lendorAccount = _accounts[lendor];
 
