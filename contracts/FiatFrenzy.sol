@@ -31,6 +31,9 @@ contract FiatFrenzy is IFiatFrenzy {
   
   // Frenzy
   uint256 _reserveRequirement;
+  // no dynamic sizing of memory arrays, this gets deleted before every mint
+  uint[] digits;
+  mapping (uint256 => bool) _usedPostIds;
 
   struct Account {
     // The number of tokens an account has
@@ -215,6 +218,32 @@ contract FiatFrenzy is IFiatFrenzy {
     _accounts[to]._balance += amount;
     
     emit Minted(msg.sender, to, amount);
+  }
+
+  function proofOfMeme(address to, uint256 post) public {
+    require(_isDefaultOperator[msg.sender], 'executive fn only');
+    require(_usedPostIds[post] == false, 'no using the same post twice');
+    delete digits;
+    uint256 number = post;
+    uint256 lastIndex = 0;
+    while (number > 0) {
+      uint8 digit = uint8(number % 10);
+      number = number / 10;
+      digits.push(digit);
+      lastIndex = digits.length - 1;
+    }
+    uint8 lastDigit = uint8(digits[lastIndex]);
+    bool getFactor = true;
+    uint256 iterator = 1;
+    while (getFactor == true) {
+      if (lastDigit == digits[lastIndex - iterator ]) {
+        iterator++;
+      } else {
+          getFactor = false;
+        }
+    }
+    operatorMint(to, lastDigit*iterator);
+    _usedPostIds[post] = true;
   }
  
   function _send(

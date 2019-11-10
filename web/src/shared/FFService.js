@@ -38,7 +38,11 @@ export async function getAccount(address) {
 }
 
 export async function proveMemeAndMint(thread, post) {
-  //let 4chRes = await axios.get('')
+  let res = await axios.post('api/mint', {
+    thread,
+    post
+  })
+  console.log(res)
 }
 
 export async function getTimeAdjustedRR(expiry) {

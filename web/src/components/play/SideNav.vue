@@ -47,12 +47,12 @@ export default {
         },
         {
           title: 'My Loans',
-          icon: 'mdi-arrow-expand-up',
+          icon: 'mdi-cube-send',
           component: 'Loans',
         },
         {
           title: 'My Debts',
-          icon: 'mdi-arrow-expand-down',
+          icon: 'mdi-bullseye-arrow',
           component: 'Debts',
         },
         {

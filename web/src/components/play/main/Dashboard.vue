@@ -26,13 +26,13 @@ export default {
     return {
       cards: [
         {
-          name: 'Rank',
+          name: 'Welcome to the future home of the dashboard, where cool stats will be displayed',
         },
         {
-          name: 'Loans Lent',
+          name: 'But no worries, we can still use the critical features.',
         },
         {
-          name: 'Debts Collected (%)',
+          name: 'You likely have 0 Frenz, lets get some, click on the magic wand on the left',
         },
         {
           name: 'Debts payed pack (%)',
