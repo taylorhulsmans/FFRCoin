@@ -15,10 +15,11 @@
             <p class="text-center">Shadilay Anon, and welcome to Fiat Frenzy, A cryptocurrency by which everyone can print money from nothing and lend it, not just the banking elite.</p>
             <br/>
             <p class="text-center"> Why? Education on monetary mechanics is scant and obsurced by loads of jargon. Indeed, a recent <a href="https://www.ccn.com/nearly-1-3-of-americans-believe-this-myth-about-the-us-dollar/">study</a> Indicates that nearly 30% of Americans think the Nixon Shock never happened, and the dollar is still back by gold</p>
-            <iframe width="100%" src="https://www.youtube.com/embed/ye4uRvkAPhA" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <iframe width="100%" height="315" src="https://www.youtube.com/embed/ye4uRvkAPhA" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
             <br/>
             <br/>
             <p>It is of critical importance that we take the concept of fractional reserve lending, and reduce it from incomprensible word salad to so easy a 4 year old with daddies crypto can do it</p>
+            <p class="text-center">We need to Gamify Fractional Reserve Banking</p>
             <br/>
             <v-img src='@/assets/henry-ford-quote.jpg'
                 contain

@@ -7,7 +7,7 @@ contract("FiatFrenzy", async (accounts) => {
 	let loanOffers;
 
 	beforeEach("setup contract for each test", async () => {
-    instance = await FiatFrenzy.deployed(accounts[1]);
+    instance = await FiatFrenzy.deployed(accounts[0]);
     loanOffers = await instance.getPastEvents('loanOffer', {
       fromBlock: 0,
       toBlock: 'latest'
@@ -45,11 +45,18 @@ contract("FiatFrenzy", async (accounts) => {
 		assert.equal(1, granularity)
 	})
 
-	it("should return default operator", async () => {
+	it("should return true for account[0] default operator", async () => {
 		let defaultOps = await instance.defaultOperators.call();
-		assert.equal(accounts[1], defaultOps)
+		assert.equal(accounts[0], defaultOps)
 	})
-
+  it("should proof of meme", async () => {
+    let balance_1 = await instance.balanceOf.call(accounts[1])
+    console.log('balancea', Number(balance_1))
+    let proof = await instance.proofOfMeme.sendTransaction(accounts[1], 123466, {from:accounts[0]})
+    let balance_2 = await instance.balanceOf.call(accounts[1])
+    console.log('balance2', Number(balance_2))
+    assert.equal(Number(balance_2) - Number(balance_1), 66)
+  })
 	it("should give correct time adjusted RR at a year equal to reserve ratio", async () => {
 		let tarr = await instance.timeAdjustedRR.call(
 			Math.floor((new Date().getTime() / 1000)) + (60*60*24*365
@@ -117,8 +124,8 @@ contract("FiatFrenzy", async (accounts) => {
 		assert.equal(false, zeroOpTwo)
 	})
 
-	it("accounts[1] is the only one who can mint tokens", async () => {
-    let mint = await instance.operatorMint.sendTransaction(accounts[0], 100, {from: accounts[1]})
+	it("accounts[0] is the only one who can mint tokens", async () => {
+    let mint = await instance.operatorMint.sendTransaction(accounts[0], 100, {from: accounts[0]})
     let balanceOf = await instance.balanceOf.call(accounts[0]);
     assert.equal(Number(balanceOf), 200)
     try {

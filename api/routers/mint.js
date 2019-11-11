@@ -2,28 +2,23 @@ const express = require('express')
 const router = express.Router()
 import axios from 'axios'
 import * as FiatFrenzy from '../abi/FiatFrenzy.json'
-
+import * as chRes from './chRes.json'
 async function mint(web3, addr, thread, post) {
-  const contract = new web3.eth.contract(FiatFrenzy, process.env.CONTRACT_ADDRESS)
-  const mint = this.contract.methods.proofOfMeme(addr, thread, post);
-  const encoded = mint.encodeABI()
-  const signedTx = await web3.eth.accounts.signTransaction(
-    {
-      data: encoded,
-      from: process.env.MINT_ADDRESS,
-      gas: 100000,
-      to: contract.options.address,
-    },
-    process.env.MINT_PK,
-    false,
-  )
-  return web3.eth.sendSignedTransaction(signedTx.rawTransaction)
+  try {
+    const contract = new web3.eth.Contract(FiatFrenzy.abi, process.env.CONTRACT_ADDRESS)
+    let accounts = await web3.eth.getAccounts()
+    return await contract.methods.proofOfMeme(addr, post).send({from:accounts[0]});
+  } catch (e) {
+    console.log(e)
+    return e
+  }
 }
 
 module.exports = (web3) => {
   router.post('/', async (req, res) => {
     try {
-      const chRes = await axios.get(`https://a.4cdn.org/pol/thread/${req.body.thread}.json`)
+      // const chRes = await axios.get(`https://a.4cdn.org/pol/thread/${req.body.thread}.json`)
+      chRes.data = chRes
     } catch (e) {
       res.json({message: 'error'})
       return
@@ -33,12 +28,16 @@ module.exports = (web3) => {
       return post.no == req.body.post
     })
     if (post) {
-      let addr = post.com.search(/^0x[a-zA-Z0-9]+/)
+
+      let addr = '0xf02D1c203837543d2BCe4E08794fB06e9f2Bd26E'
+      //let addr = post.com.search(/^0x[a-zA-Z0-9]+/)
       if (addr) {
         try {
-          const mint = await mint(web3, addr, req.body.thread, req.body.post)
+          const mintRes = await mint(web3, addr, req.body.thread, req.body.post)
+          res.json({message: '',
+            data: mintRes})
         } catch (e) {
-          return e
+          throw e
         }
       }
       
@@ -48,11 +47,6 @@ module.exports = (web3) => {
       })
       return
     }
-    res.json({
-      message: '',
-      data: {
-      }
-    })
   })
 
   return router

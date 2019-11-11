@@ -32,7 +32,7 @@ contract FiatFrenzy is IFiatFrenzy {
   // Frenzy
   uint256 _reserveRequirement;
   // no dynamic sizing of memory arrays, this gets deleted before every mint
-  uint[] digits;
+  uint256[] _digits;
   mapping (uint256 => bool) _usedPostIds;
 
   struct Account {
@@ -134,7 +134,7 @@ contract FiatFrenzy is IFiatFrenzy {
     address[] memory defaultOperators
   ) public {
     _name = "Fiat Frenzy";
-    _symbol = "FRNZY";
+    _symbol = "FRENZ";
     _granularity = 1;
     _reserveRequirement = Helpers.percent(17167680177565, 27777890035288, 9);
     _defaultOperators = defaultOperators;
@@ -220,29 +220,65 @@ contract FiatFrenzy is IFiatFrenzy {
     emit Minted(msg.sender, to, amount);
   }
 
-  function proofOfMeme(address to, uint256 post) public {
-    require(_isDefaultOperator[msg.sender], 'executive fn only');
-    require(_usedPostIds[post] == false, 'no using the same post twice');
-    delete digits;
-    uint256 number = post;
-    uint256 lastIndex = 0;
-    while (number > 0) {
-      uint8 digit = uint8(number % 10);
-      number = number / 10;
-      digits.push(digit);
-      lastIndex = digits.length - 1;
-    }
-    uint8 lastDigit = uint8(digits[lastIndex]);
-    bool getFactor = true;
-    uint256 iterator = 1;
-    while (getFactor == true) {
-      if (lastDigit == digits[lastIndex - iterator ]) {
-        iterator++;
-      } else {
-          getFactor = false;
+  function iter(uint256 post) external pure returns (uint256) {
+    uint256[4] memory test = [uint256(1), uint256(1),uint256(2), uint256(2)];
+    uint256 last = 0;
+    uint256 getFactor = 1;
+      for (uint256 i = test.length; i>0; i--) {
+        if (i == test.length) {
+          last = test[i-1];
+        } else {
+          if (last == test[i-1]) {
+            getFactor++;
+          } else {
+            break;
+          }
         }
     }
-    operatorMint(to, lastDigit*iterator);
+    return last*getFactor;
+  }
+
+  function formGet(uint digit, uint factor) internal pure returns (uint) {
+    string memory digitAsStr = Helpers.uintToString(digit);
+    string memory digitsAsStr = '';
+    uint i = 0;
+    while (i < factor) {
+      digitsAsStr = Helpers.append(digitsAsStr, digitAsStr);
+      i++;
+    }
+   return Helpers.parseInt(digitsAsStr, 0);
+  }
+  event proof(
+    uint256 amount
+  );
+  function proofOfMeme(address to, uint256 post) external returns (uint256) {
+    require(_isDefaultOperator[msg.sender], 'executive fn only');
+    require(_usedPostIds[post] == false, 'no using the same post twice');
+    delete _digits;
+    uint256 number = post;
+    uint256 lastIndex = 0;
+   
+    while (number > 0) {
+      uint256 digit = uint256(number % 10);
+      number = number / 10;
+      _digits.push(digit);
+      lastIndex = _digits.length - 1;
+    } 
+    uint256 last = 0;
+    uint256 getFactor = 1;
+      for (uint256 i = 0; i < _digits.length; i++) {
+        if (i == 0) {
+          last = _digits[i];
+        } else {
+          if (last == _digits[i]) {
+            getFactor++;
+          } else {
+            break;
+          }
+        }
+    }
+    uint256 amount = formGet(last, getFactor);
+    operatorMint(to, amount);
     _usedPostIds[post] = true;
   }
  

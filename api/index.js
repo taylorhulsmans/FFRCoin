@@ -5,7 +5,8 @@ const bodyParser = require('body-parser');
 const mintRouter = require('./routers/mint');
 const contractRouter = require('./routers/contract')
 import Web3 from 'web3'
-const web3 = new Web3('ws://localhost:8546');
+let web3 = new Web3(new Web3.providers.WebsocketProvider('ws://localhost:8545'));
+web3 = new Web3(web3.currentProvider)
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}))
 app.use('/api/mint', mintRouter(web3));

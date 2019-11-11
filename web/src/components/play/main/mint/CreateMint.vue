@@ -49,7 +49,8 @@ export default {
   methods: {
     async submitProofOfMeme() {
       if (this.valid) {
-        return await FFService.proveMemeAndMint(this.thread, this.post)
+        let proof = await FFService.proveMemeAndMint(this.thread, this.post)
+        console.log(proof)
       }
     },
   }

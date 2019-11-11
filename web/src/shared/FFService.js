@@ -42,6 +42,7 @@ export async function proveMemeAndMint(thread, post) {
     thread,
     post
   })
+  return res
   console.log(res)
 }
 
