@@ -4,29 +4,50 @@
     <v-container fluid>
       <v-layout row wrap justify-center>
         <v-flex xs10 sm8 md6 lg4 xl4>
-          <h1 class="text-center"><i>Fiat Frenzy</i></h1>
-          <h2 class="text-center"><i>Fractional Reserve Lending for All</i></h2>
           <br/>
+        </v-flex>
+      </v-layout>
+      <v-layout row wrap justify-center align-center>
+        <v-flex xs12 sm6>
           <v-img src='@/assets/andrew-thug.png'
             contain
+            width="61.8%"
+            style="margin: 0 auto;"/>
+        </v-flex>
+        <v-flex xs12 sm6 class="justify-center align-center pa-4"> 
+          <h1 class="text-center display-4"><i>Fiat Frenzy</i></h1>
+          <br/>
+          <p class="text-center display-1">Permissionless Fractional Reserve Banking</p>
+        </v-flex>
+        </v-layout>
+        <v-layout row wrap justify-center align-center>
+          <v-flex xs12 sm6 class="justify-center align-center pa-4">
+        <p class="text-center headline pa-4"><i>Welcome Message</i></p>
+        <p class="text-center"> I hope you've stumbled upon a conspiracy video or two about the <i>The Federal Reserve</i>. . .<br/><br/> If not, I dare say, what you will come to learn by playing this game will not only <i><b>Drastically</b></i> change your perception and beliefs about money. . .<br/><br/> But fundementally <i>rock</i> your understanding of how the world actually operates. . . Welcome, to<br><i><b>Fiat Frenzy</b></i></br></p> 
+        </v-flex>
+        <v-flex xs12 sm6 class="justify-center align-center pa-4">
+          <v-img src='@/assets/rothschildquote.jpg'
+            contain
+            width="85.41%"
             style="margin: 0 auto"/>
-            <br/>
-            <br/>
-            <p class="text-center">Shadilay Anon, and welcome to Fiat Frenzy, A cryptocurrency by which everyone can print money from nothing and lend it, not just the banking elite.</p>
-            <br/>
-            <p class="text-center"> Why? Education on monetary mechanics is scant and obsurced by loads of jargon. Indeed, a recent <a href="https://www.ccn.com/nearly-1-3-of-americans-believe-this-myth-about-the-us-dollar/">study</a> Indicates that nearly 30% of Americans think the Nixon Shock never happened, and the dollar is still back by gold</p>
+        </v-flex>
+        <p class="text-center headline pa-4"><i>Starting with Why. . .</i></p>
+
+        <v-img src='@/assets/henry-ford-quote.jpg'
+            contain
+            style="margin: 0 auto"
+          />
+          <br/>
+          <br/>
+        <p> Education on monetary mechanics is scant and obsurced by loads of jargon. Indeed, a recent <a href="https://www.ccn.com/nearly-1-3-of-americans-believe-this-myth-about-the-us-dollar/">study</a> Indicates that nearly 30% of Americans think the Nixon Shock never happened, and the dollar is still backed by gold</p>
             <iframe width="100%" height="315" src="https://www.youtube.com/embed/ye4uRvkAPhA" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
             <br/>
+        <br/>
             <br/>
             <p>It is of critical importance that we take the concept of fractional reserve lending, and reduce it from incomprensible word salad to so easy a 4 year old with daddies crypto can do it</p>
             <p class="text-center">We need to Gamify Fractional Reserve Banking</p>
             <br/>
-            <v-img src='@/assets/henry-ford-quote.jpg'
-                contain
-                style="margin: 0 auto"
-              />
-              <br/>
-              <br/>
+        <br/>
             <p class="text-center">How? Fiat Frenzy builds atop the Ethereum blockchain and standard token contract, and adds the ability to offer, sign and repay loans</p>
             <p class="text-center">But when I say sign and repay, I don't mean them in the way you or I would make a loan arrangment.</p>
             <p class="text-center">Oh No...</p>
@@ -39,7 +60,7 @@
               <br/>
             <p class="text-center">But OP, this will get out of hand to quickly, I'll simply make a bot that will lend money to myself and repay instantly an infinitum</p>
             <p class="text-center">You think this doesn't happen in todays monetary system? What do you think tax havens and shell companies are for? The best banks outwit regulators</p>
-            <p class="text-center"> But, alas this crypto has standards, A reserveLimit of phi - 1 (~61.8%) at the annum and prevents loan prepayment. This means that a user can lend at most 61.8% of their total money, but this number is less if the loan term is less than a year.<br/>  This means bigger loans are allowed the longer in time they are, reaching a max of 61.8% per year.</p>
+            <p class="text-center"> But, alas this crypto has standards, A reserveLimit of phi - 1 (~61.8%) at the annum and programatically prevents loan prepayment till after expiry. This means that a user can lend at most 61.8% of their total money, but this number is less if the loan term is less than a year.<br/>  This means bigger loans are allowed the longer in time they are, reaching a max of 61.8% per year.</p>
             <p class="text-center"> Okay OP, this is pretty cool, but one thing i don't get, is if you need money to create money, how does the process start? did you mint yourself a billion coins like other wannabie-crypto projects like Stellar and Ripple?</p>
             <p class="text-center"> No, kek.  My solution is a tad bit more creative</p>
             <p class="text-center"> The initial coin offering will be governed by the will of Kek itself, I call it Proof of Meme</p>
@@ -82,6 +103,7 @@ export default {
   },
 
   data: () => ({
+    phi: (1 + Math.sqrt(5)) / 2,
   }),
 };
 </script>

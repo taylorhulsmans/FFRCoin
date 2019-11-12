@@ -52,7 +52,7 @@ contract("FiatFrenzy", async (accounts) => {
   it("should proof of meme", async () => {
     let balance_1 = await instance.balanceOf.call(accounts[1])
     console.log('balancea', Number(balance_1))
-    let proof = await instance.proofOfMeme.sendTransaction(accounts[1], 123466, {from:accounts[0]})
+    let proof = await instance.proofOfMeme.sendTransaction(accounts[1], 123456666, {from:accounts[0]})
     let balance_2 = await instance.balanceOf.call(accounts[1])
     console.log('balance2', Number(balance_2))
     assert.equal(Number(balance_2) - Number(balance_1), 66)

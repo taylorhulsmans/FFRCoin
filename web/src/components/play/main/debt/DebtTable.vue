@@ -115,6 +115,8 @@ export default {
   },
   beforeDestroy() {
     this.$vueEventBus.$off('new-debt-confirmed')
+    this.$vueEventBus.$off('sign-loan-mining')
+    this.$vueEventBus.$off('sign-loan-mined')
   },
   methods: {
     getColor (isApproved) {

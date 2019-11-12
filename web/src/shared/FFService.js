@@ -43,7 +43,6 @@ export async function proveMemeAndMint(thread, post) {
     post
   })
   return res
-  console.log(res)
 }
 
 export async function getTimeAdjustedRR(expiry) {

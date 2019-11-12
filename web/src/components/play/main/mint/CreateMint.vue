@@ -51,6 +51,9 @@ export default {
       if (this.valid) {
         let proof = await FFService.proveMemeAndMint(this.thread, this.post)
         console.log(proof)
+        if (proof.data.message === 'success') {
+          this.$vueEventBus.$emit('minted');
+        }
       }
     },
   }

@@ -75,6 +75,7 @@ export default {
     const now = new Date().getTime() / 1000;
     this.$vueEventBus.$on('sign-loan-mined', this.signLoanChange);
     this.$vueEventBus.$on('repay-loan-mined', this.repayLoanChange);
+    this.$vueEventBus.$on('minted', this.mintedChange);
     this.contract = await FFService.getContract();
     this.addresses = await FFService.addresses();
     this.account = await FFService.getAccount(this.addresses[0]);

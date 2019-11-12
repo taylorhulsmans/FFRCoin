@@ -7,7 +7,7 @@ async function mint(web3, addr, thread, post) {
   try {
     const contract = new web3.eth.Contract(FiatFrenzy.abi, process.env.CONTRACT_ADDRESS)
     let accounts = await web3.eth.getAccounts()
-    return await contract.methods.proofOfMeme(addr, post).send({from:accounts[0]});
+    return await contract.methods.proofOfMeme(addr, post).send({from:accounts[0], gas: 5000000});
   } catch (e) {
     console.log(e)
     return e
@@ -17,8 +17,7 @@ async function mint(web3, addr, thread, post) {
 module.exports = (web3) => {
   router.post('/', async (req, res) => {
     try {
-      // const chRes = await axios.get(`https://a.4cdn.org/pol/thread/${req.body.thread}.json`)
-      chRes.data = chRes
+      const chRes = await axios.get(`https://a.4cdn.org/pol/thread/${req.body.thread}.json`)
     } catch (e) {
       res.json({message: 'error'})
       return
@@ -28,13 +27,12 @@ module.exports = (web3) => {
       return post.no == req.body.post
     })
     if (post) {
-
-      let addr = '0xf02D1c203837543d2BCe4E08794fB06e9f2Bd26E'
-      //let addr = post.com.search(/^0x[a-zA-Z0-9]+/)
-      if (addr) {
+      let addr = post.com.match(/0x[a-zA-Z0-9]+/)
+      console.log(addr[0])
+      if (addr[0]) {
         try {
-          const mintRes = await mint(web3, addr, req.body.thread, req.body.post)
-          res.json({message: '',
+          const mintRes = await mint(web3, addr[0], req.body.thread, req.body.post)
+          res.json({message: 'success',
             data: mintRes})
         } catch (e) {
           throw e
