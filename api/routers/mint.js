@@ -16,18 +16,22 @@ async function mint(web3, addr, thread, post) {
 
 module.exports = (web3) => {
   router.post('/', async (req, res) => {
+    let chRes = null;
     try {
-      const chRes = await axios.get(`https://a.4cdn.org/pol/thread/${req.body.thread}.json`)
+      chRes = await axios.get(`https://a.4cdn.org/pol/thread/${req.body.thread}.json`)
+      
     } catch (e) {
-      res.json({message: 'error'})
+      console.log(e)
+      res.json({message: 'erroria', data: e})
       return
     }
-
+    console.log(chRes.data)
     let post = chRes.data.posts.find((post) => {
       return post.no == req.body.post
     })
     if (post) {
-      let addr = post.com.match(/0x[a-zA-Z0-9]+/)
+      const cleanText = post.com.replace(/<\/?[^>]+(>|$)/g, "");
+      let addr = cleanText.match(/0x[a-zA-Z0-9]+/)
       console.log(addr[0])
       if (addr[0]) {
         try {
