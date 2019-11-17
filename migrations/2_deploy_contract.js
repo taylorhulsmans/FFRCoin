@@ -1,7 +1,7 @@
-var FiatFrenzy = artifacts.require('./FiatFrenzy.sol');
-var Helpers = artifacts.require('./Helpers.sol');
+var FiatFrenzy = artifacts.require('FiatFrenzy');
+var Helpers = artifacts.require('Helpers');
 module.exports = function(deployer, network, accounts) {
-	deployer.deploy(Helpers);
-	deployer.link(Helpers, FiatFrenzy);
-	deployer.deploy(FiatFrenzy, [accounts[0]] )
+  deployer.deploy(Helpers);
+  deployer.link(Helpers, FiatFrenzy);
+  deployer.deploy(FiatFrenzy, [accounts[0]])
 }

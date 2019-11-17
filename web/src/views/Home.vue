@@ -15,15 +15,15 @@
             style="margin: 0 auto;"/>
         </v-flex>
         <v-flex xs12 sm6 class="justify-center align-center pa-4">
-          <h1 class="text-center display-4"><i>Fiat Frenzy</i></h1>
+          <h1 class="text-center display-4 font-bold font-italic font-weight-bold">Fiat Frenzy</h1>
           <br/>
           <p class="text-center display-1">Permissionless Fractional Reserve Banking</p>
         </v-flex>
         </v-layout>
         <v-layout row wrap justify-center align-center>
           <v-flex xs12 sm12 md6 class="justify-center align-center pa-4">
-        <p class="text-center headline pa-4"><i>Welcome Message</i></p>
-        <p class="text-center title"> I hope you've stumbled upon a conspiracy video or two about the <i>The Federal Reserve</i>. . .<br/><br/> If not, I dare say, what you will come to learn by playing this game will not only <i><b>Drastically</b></i> change your perception and beliefs about money. . .<br/><br/> But fundementally <i>rock</i> your understanding of how the world actually operates. . . Welcome, to<br><i><b>Fiat Frenzy</b></i></br></p> 
+        <p class="text-center display-1 pa-4 font-weight-bold"><i>Welcome Message</i></p>
+        <p class="text-center headline"> I hope you've stumbled upon a conspiracy video or two about the <i>The Federal Reserve</i>. . .<br/><br/> If not, I dare say, what you will come to learn by playing this game will not only <i><b>Drastically</b></i> change your perception and beliefs about money. . .<br/><br/> But fundementally <i>rock</i> your understanding of how the world actually operates. . . Welcome, to<br><i><b>Fiat Frenzy</b></i></br></p> 
         </v-flex>
         <v-flex xs12 sm12 md6 class="justify-center align-center pa-4">
           <v-img src='@/assets/rothschildquote.jpg'
@@ -42,22 +42,24 @@
             />
           </v-flex>  
           <v-flex xs12 sm12 md6 class="justify-center align-center pa-4">
-            <p class="text-center headline pa-4"><i>Starting with Why. . .</i></p>
-            <p class="text-center title"> Education on monetary mechanics is scant and obsurced by loads of jargon. Indeed, a recent <a href="https://www.ccn.com/nearly-1-3-of-americans-believe-this-myth-about-the-us-dollar/">study</a> Indicates that nearly 30% of Americans think the Nixon Shock never happened, and the dollar is still backed by gold</p>
+            <p class="text-center display-1 pa-4 font-weight-bold"><i>Starting with Why. . .</i></p>
+            <p class="text-center headline"> Education on monetary mechanics is scant and obsurced by loads of jargon. Indeed, a recent <a href="https://www.ccn.com/nearly-1-3-of-americans-believe-this-myth-about-the-us-dollar/">study</a> Indicates that nearly 30% of Americans think the Nixon Shock never happened, and the dollar is still backed by gold</p>
             <br/>
-            <p class="text-center title">It is of critical importance that we take the concept of fractional reserve lending, and reduce it from incomprensible word salad to so easy a 4 year old with daddies crypto can do it</p>
+            <p class="text-center headline">It is of critical importance that we take the concept of fractional reserve lending, and reduce it from incomprensible word salad to so easy a 4 year old with daddies crypto can do it</p>
             <br/>
-            <p class="text-center title"><i>We need to Gamify Fractional Reserve Banking</i></p>
+            <p class="text-center headline"><i>We need to Gamify Fractional Reserve Banking</i></p>
           </v-flex>
          </v-layout>
          <v-layout row wrap justify-center align-center>
           <v-flex xs12 sm12 md6 class="justify-center align-center pa-4">
-            <p class="text-center headline"><i>How...</i></p>
+            <p class="text-center display-1 font-weight-bold"><i>How...</i></p>
             <br/>
-            <p class="text-center title">How? Fiat Frenzy builds atop the Ethereum blockchain and standard token contract, and adds the ability to offer, sign and repay loans</p>
-            <p class="text-center title">But when I say sign and repay, I don't mean them in the way you or I would make a loan arrangment.</p>
-            <p class="text-center title">Oh No...</p>
-            <p class="text-center title">Money will be minted for the debtor, and repaid to the buyer after expiration.</p>
+            <p class="text-center headline">Fiat Frenzy builds atop the Ethereum blockchain and standard token contract, and adds the ability to offer, sign and repay loans</p>
+            <p class="text-center headline">But when I say sign and repay, I don't mean them in the way you or I would make a loan arrangment.</p>
+            <p class="text-center headline">Oh No...</p>
+            <p class="text-center headline">Money will be minted for the debtor, and repaid to the buyer after expiration.</p>
+            <p class="text-center headline">The extent to which any individual can perform this, is bounded by the reserve limit of phi - 1 (61.8%)</p>
+            <p class="text-center headline"> Additionally, the reserve limit is time delimited to the annum, meaning the max lend is higher the further in time you go</p>
           </v-flex>
           <v-flex xs12 sm12 md6 class="justify-center align-center pa-4">
             <v-img src='@/assets/fcl.png'
@@ -116,3 +118,9 @@ export default {
   }),
 };
 </script>
+<style>
+.theme--dark.v-application {
+  color: gainsboro;
+}
+
+</style>

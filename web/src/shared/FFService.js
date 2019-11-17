@@ -1,15 +1,14 @@
 import axios from 'axios';
-
+import * as contractData from '../assets/FiatFrenzy.json';
 export async function getContract() {
-  let contractData = null;
-  try {
-    contractData = await axios.get('api/contract');
-  } catch (e) {
-    return e;
+  let addr = null;
+  if (process.env.NODE_ENV === 'development') {
+    addr = '0x1CF0A4890dDD26186010B6f13335859f9BefD84c'
+  } else {
+    addr = '0xA9d0c0ad6749684dC25C2F48AC6049e77a2A2F9A'
   }
-  const { address } = contractData.data;
-  const { abi } = contractData.data.FiatFrenzy;
-  return new window.web3.eth.Contract(abi, address);
+  const {abi} = contractData.default;
+  return new window.web3.eth.Contract(abi, addr);
 }
 
 

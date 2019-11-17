@@ -1,3 +1,4 @@
+require('dotenv').config()
 /**
  * Use this file to configure your truffle project. It's seeded with some
  * common settings for different networks and features like migrations,
@@ -22,12 +23,13 @@
  *
  */
 
-// const HDWallet = require('truffle-hdwallet-provider');
+const HDWalletProvider = require('@truffle/hdwallet-provider');
 // const infuraKey = "fj4jll3k.....";
 //
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
-
+const mnemonic = process.env.MEMNONIC.toString()
+console.log(process.env.INFURA_KEY)
 module.exports = {
   /**
    * Networks define how you connect to your ethereum client and let you set the
@@ -52,9 +54,18 @@ module.exports = {
 			 network_id: "*",        //Any network (default: none)
      },
 
+    kovan: {
+      provider: () => new HDWalletProvider(mnemonic, `https://kovan.infura.io/v3/${process.env.INFURA_KEY}`),
+      network_id:42,
+       gas: 5500000,        // Ropsten has a lower block limit than mainnet
+       confirmations: 2,    // # of confs to wait between deployments. (default: 0)
+       timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
+       skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
+
+    },
+
     // Another network with more advanced options...
     // advanced: {
-      // port: 8777,             // Custom port
       // network_id: 1342,       // Custom network
       // gas: 8500000,           // Gas sent with each transaction (default: ~6700000)
       // gasPrice: 20000000000,  // 20 gwei (in wei) (default: 100 gwei)
@@ -62,16 +73,14 @@ module.exports = {
       // websockets: true        // Enable EventEmitter interface for web3 (default: false)
     // },
 
-    // Useful for deploying to a public network.
-    // NB: It's important to wrap the provider as a function.
-    // ropsten: {
-      // provider: () => new HDWalletProvider(mnemonic, `https://ropsten.infura.io/${infuraKey}`),
-      // network_id: 3,       // Ropsten's id
-      // gas: 5500000,        // Ropsten has a lower block limit than mainnet
-      // confirmations: 2,    // # of confs to wait between deployments. (default: 0)
-      // timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
-      // skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
-    // },
+     ropsten: {
+       provider: () => new HDWalletProvider(mnemonic, `https://ropsten.infura.io/v3/${process.env.INFURA_KEY}`),
+       network_id: 3,       // Ropsten's id
+       gas: 5500000,        // Ropsten has a lower block limit than mainnet
+       confirmations: 2,    // # of confs to wait between deployments. (default: 0)
+       timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
+       skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
+     },
 
     // Useful for private networks
     // private: {

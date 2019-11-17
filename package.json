@@ -1,0 +1,29 @@
+{
+  "name": "fiat-frenzy-777",
+  "version": "1.0.0",
+  "description": "Think money doesn't grow on trees? Think again. Fiat Frenzy brings fractional reserve lending baked into the system, for everyone",
+  "main": "test.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "@truffle/hdwallet-provider": "^1.0.25",
+    "any-promise": "^1.3.0",
+    "bindings": "^1.5.0",
+    "dotenv": "^8.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Joe-mcgee/Fiat-Frenzy-777.git"
+  },
+  "author": "",
+  "license": "IrC",
+  "bugs": {
+    "url": "https://github.com/Joe-mcgee/Fiat-Frenzy-777/issues"
+  },
+  "homepage": "https://github.com/Joe-mcgee/Fiat-Frenzy-777#readme"
+}

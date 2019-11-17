@@ -1,8 +1,7 @@
 pragma solidity 0.5.8;
-import { IFiatFrenzy } from './IFiatFrenzy.sol';
 import './Helpers.sol';
 
-contract FiatFrenzy is IFiatFrenzy {
+contract FiatFrenzy  {
   // Coin Meta
   string internal _name;
   string internal _symbol;
@@ -100,7 +99,6 @@ contract FiatFrenzy is IFiatFrenzy {
     uint256 dayInS = 3600*24;
     // i believe this floors, is this satisfactory on the edge?
     uint256 daysTillExpiry = lengthOfTimeInS / dayInS;
-    uint256 not = 1000000000;
     
     if (daysTillExpiry < 365) {
       uint256 increment = _reserveRequirement / 365;
@@ -220,23 +218,6 @@ contract FiatFrenzy is IFiatFrenzy {
     emit Minted(msg.sender, to, amount);
   }
 
-  function iter(uint256 post) external pure returns (uint256) {
-    uint256[4] memory test = [uint256(1), uint256(1),uint256(2), uint256(2)];
-    uint256 last = 0;
-    uint256 getFactor = 1;
-      for (uint256 i = test.length; i>0; i--) {
-        if (i == test.length) {
-          last = test[i-1];
-        } else {
-          if (last == test[i-1]) {
-            getFactor++;
-          } else {
-            break;
-          }
-        }
-    }
-    return last*getFactor;
-  }
 
   function formGet(uint digit, uint factor) internal pure returns (uint) {
     string memory digitAsStr = Helpers.uintToString(digit);
@@ -301,7 +282,6 @@ contract FiatFrenzy is IFiatFrenzy {
     uint256 amount,
     bytes calldata data
   ) isMultipleOf(amount)
-    isWithinReserveRatio(msg.sender, amount)
   external {
     _send(to, msg.sender, amount);   
     emit Sent(msg.sender, to, amount, data); 
