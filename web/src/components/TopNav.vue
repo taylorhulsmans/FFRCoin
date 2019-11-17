@@ -30,13 +30,14 @@
       <v-btn icon
         v-for="button in rightNav"
         :key="button.name"
-        :to="button.name" exact
+        :href="button.link"
+        target="_blank"
         active-class="highlighted"
         :class="button.name === $route.path ?
           'highlighted':
           ''
-        ">
-        <v-icon>{{button.symbol}}</v-icon>
+          ">
+            <v-icon>{{button.symbol}}</v-icon>
       </v-btn>
 
     </v-toolbar>
@@ -64,10 +65,12 @@ export default {
         {
           name: 'github',
           symbol: 'mdi-github-circle',
+          link: 'https://github.com/Joe-mcgee/Fiat-Frenzy-777'
         },
         {
           name: 'blockchain',
           symbol: 'mdi-cube-scan',
+          link:'https://ropsten.etherscan.io/address/0xA9d0c0ad6749684dC25C2F48AC6049e77a2A2F9A'
         },
         {
           name: 'search',
