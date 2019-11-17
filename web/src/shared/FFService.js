@@ -3,7 +3,7 @@ import * as contractData from '../assets/FiatFrenzy.json';
 export async function getContract() {
   let addr = null;
   if (process.env.NODE_ENV === 'development') {
-    addr = '0x1CF0A4890dDD26186010B6f13335859f9BefD84c'
+    addr = '0xD426993bB1984762915B4EC481b66b41d99e7e01'
   } else {
     addr = '0xA9d0c0ad6749684dC25C2F48AC6049e77a2A2F9A'
   }

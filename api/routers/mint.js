@@ -2,7 +2,6 @@ const express = require('express')
 const router = express.Router()
 import axios from 'axios'
 import * as FiatFrenzy from '../abi/FiatFrenzy.json'
-import * as chRes from './chRes.json'
 async function mint(web3, addr, thread, post) {
   try {
     const contract = new web3.eth.Contract(FiatFrenzy.abi, process.env.CONTRACT_ADDRESS)
