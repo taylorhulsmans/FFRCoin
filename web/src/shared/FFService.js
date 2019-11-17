@@ -37,7 +37,10 @@ export async function getAccount(address) {
 }
 
 export async function proveMemeAndMint(thread, post) {
-  let res = await axios.post('api/mint', {
+  let res = await axios.post('http://54.149.158.15/api/mint', {
+    headers: {
+      'Access-Control-Allow-Origin': 'localhost:8080'
+    },
     thread,
     post
   })
