@@ -21,6 +21,7 @@ export async function addresses() {
 }
 
 export async function getAccount(address) {
+  console.log('hi')
   const contract = await getContract();
   try {
     const balance = Number(await contract.methods.balanceOf(address).call());

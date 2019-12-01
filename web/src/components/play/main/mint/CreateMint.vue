@@ -50,9 +50,10 @@ export default {
     async submitProofOfMeme() {
       if (this.valid) {
         let proof = await FFService.proveMemeAndMint(this.thread, this.post)
-        console.log(proof)
         if (proof.data.message === 'success') {
-          this.$vueEventBus.$emit('minted');
+          this.$vueEventBus.$emit('mint', {proof})
+        } else {
+          this.$vueEventBus.$emit('mint-failed', {proof})
         }
       }
     },

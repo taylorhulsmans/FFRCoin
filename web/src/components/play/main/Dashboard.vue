@@ -26,6 +26,9 @@ export default {
     return {
       cards: [
         {
+          name: 'Seeing NaN in max lend? switch your metamask to the Ropsten Testnet'
+        },
+        {
           name: 'Welcome to the future home of the dashboard, where cool stats will be displayed',
         },
         {

@@ -58,6 +58,7 @@
 <script>
 import * as FFService from '../../shared/FFService';
 
+import Web3 from 'web3';
 export default {
 
   data() {
@@ -71,11 +72,21 @@ export default {
       available: null,
     };
   },
+  beforeCreate() {
+    console.log('beforecreate'
+    )
+    console.log(window.web3.version)
+    if (window.web3.version.api == "0.20.7") {
+      window.web3 = new Web3(window.web3.currentProvider)
+    }
+  },
   async created() {
     const now = new Date().getTime() / 1000;
     this.$vueEventBus.$on('sign-loan-mined', this.signLoanChange);
     this.$vueEventBus.$on('repay-loan-mined', this.repayLoanChange);
     this.$vueEventBus.$on('minted', this.mintedChange);
+    console.log('before getcontract')
+    console.log(window.web3)
     this.contract = await FFService.getContract();
     this.addresses = await FFService.addresses();
     this.account = await FFService.getAccount(this.addresses[0]);
