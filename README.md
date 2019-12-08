@@ -20,8 +20,10 @@ This project was built using whole numbers only to make it simpler for non math 
 ```npm install truffle -g``` [truffle](https://github.com/trufflesuite/truffle)
 
 ### Contracts
+```npm install```
 ```truffle deploy```
 ```truffle test```
+
 
 ### Api
 ```cd api && npm install```
