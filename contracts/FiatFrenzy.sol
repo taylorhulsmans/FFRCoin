@@ -50,6 +50,7 @@ contract FiatFrenzy  {
     bool _isApproved;
     uint256 _createdAt;
     uint256 _signedAt;
+    uint256 _interest;
   }
   // _loans[lendor][debtor]
   mapping (address => mapping (address => Loan[])) _loans;
@@ -290,7 +291,8 @@ contract FiatFrenzy  {
   function offerLoan(
     address debtor,
     uint256 amount,
-    uint256 expiry
+    uint256 expiry,
+    uint256 interest
   ) isMultipleOf(amount)
     isLoanOfferWithinReserveRatio(
       msg.sender,
@@ -300,7 +302,7 @@ contract FiatFrenzy  {
   external {
     // minimum day
     require((expiry - now) > 3600*24, 'loans must be at least a 24h');
-    Loan memory newLoan = Loan(amount, expiry, false, now, 0);
+    Loan memory newLoan = Loan(amount, expiry, false, now, 0, interest);
     // _loans[lendor][debtor]
     _loans[msg.sender][debtor].push(newLoan);
     uint256 index = _loans[msg.sender][debtor].length;
@@ -321,9 +323,9 @@ contract FiatFrenzy  {
     address lendor,
     address debtor,
     uint256 index
-  ) external view returns (uint256, uint256, bool) {
+  ) external view returns (uint256, uint256, bool, uint256) {
     Loan memory loan =  _loans[lendor][debtor][index - 1];  
-    return (loan._principle, loan._createdAt, loan._isApproved);
+    return (loan._principle, loan._createdAt, loan._isApproved, loan._interest);
   }
 
   function signLoan(
@@ -339,10 +341,10 @@ contract FiatFrenzy  {
     Account storage debtorAccount = _accounts[msg.sender];
     
     debtorAccount._balance += loan._principle;
-    debtorAccount._liabilities += loan._principle;
+    debtorAccount._liabilities += loan._principle + loan._interest;
 
     lendorAccount._liabilities += loan._principle;
-    lendorAccount._assets += loan._principle;
+    lendorAccount._assets += loan._interest;
     
     loan._isApproved = true;
     loan._signedAt = now; 
@@ -365,13 +367,17 @@ contract FiatFrenzy  {
     require(now >= loan._expiry, 'loans must be expired before they are repaid');
     Account storage debtorAccount = _accounts[msg.sender];
     Account storage lendorAccount = _accounts[lendor];
+    require(
+      debtorAccount._balance + loan._interest >= loan._principle + loan._interest, 'insufficent funds'
+    );
 
-    _send(lendor, msg.sender, loan._principle);
-    
+    _send(lendor, msg.sender, loan._interest);
+
+    debtorAccount._balance -= loan._principle; 
     debtorAccount._liabilities -= loan._principle;
     
     lendorAccount._liabilities -= loan._principle;
-    lendorAccount._assets -= loan._principle;
+    lendorAccount._assets -= loan._interest;
     
     loan._principle = 0;
     emit loanRepaid(lendor, index, msg.sender);

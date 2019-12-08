@@ -21,7 +21,6 @@ export async function addresses() {
 }
 
 export async function getAccount(address) {
-  console.log('hi')
   const contract = await getContract();
   try {
     const balance = Number(await contract.methods.balanceOf(address).call());
@@ -56,10 +55,11 @@ export async function getTimeAdjustedRR(expiry) {
   }
 }
 
-export async function offerLoan(sender, address, amount, posixDate) {
+export async function offerLoan(sender, address, amount, posixDate, interest) {
   const contract = await getContract();
+  console.log(contract)
   try {
-    return await contract.methods.offerLoan(address, Number(amount), posixDate).send({ from: sender });
+    return await contract.methods.offerLoan(address, Number(amount), posixDate, Number(interest)).send({ from: sender });
   } catch (e) {
     return e;
   }
@@ -89,6 +89,7 @@ export async function getLoans() {
       amount: result[0],
       expiry: new Date(result[1]*1000).toISOString().substr(0,10),
       isApproved: result[2],
+      interest: result[3],
     }
   })
   return Promise.all(loans).then((completed) => {
@@ -137,6 +138,7 @@ export async function getDebts() {
       amount: result[0],
       expiry: new Date(result[1]*1000).toISOString().substr(0,10),
       isApproved,
+      interest: result[3]
     }
   })
 
@@ -174,7 +176,6 @@ export async function calculateAvailable(
   const address = await addresses();
   const account = await getAccount(address[0]);
   const timeAdjustedRR = await getTimeAdjustedRR(expiry);
-  console.log('hmm')
   const not = 10 ** 9;
   const decimalRatio = (timeAdjustedRR / not);
   const val = ((decimalRatio) * account.balance) - account.liabilities

@@ -51,10 +51,16 @@ export default {
         value: 'debtor',
       },
       {
-        text: 'Amount',
+        text: 'Principle',
         align: 'left',
         filterable: true,
         value: 'amount',
+      },
+      {
+        text: 'Interest',
+        align: 'left',
+        filterable: true,
+        value: 'interest',
       },
       {
         text: 'Date',
@@ -91,6 +97,7 @@ export default {
         debtor: event.offerLoan.events.loanOffer.returnValues._debtor,
         amount: event.amount,
         expiry: event.date,
+        interest: event.interest,
 
       })
 

@@ -90,6 +90,12 @@ export default {
         value: 'amount',
       },
       {
+        text: 'Interest',
+        align: 'left',
+        filterable: true,
+        value: 'interest',
+      },
+      {
         text: 'Date',
         align: 'left',
         filterable: true,
@@ -147,7 +153,7 @@ export default {
         iDebt.isApproved = true;
         this.$set(this.debts, debtIndexForSet, iDebt);
         this.$vueEventBus.$emit('sign-loan-mined', {
-          amount: item.amount,
+          amount: Number(item.amount) + Number(item.interest),
           item,
         });
       }

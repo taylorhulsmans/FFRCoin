@@ -1,14 +1,13 @@
+
+*WIP*
+Testing on Ropsten at [Fiat Frenzy](fiatfrenzy.ninja)
+
 # Fiat Frenzy 777 edition
+## Permissionless Fractional Reserve Lending
 
-Think money doesn't grow on trees? Think again.
-Fiat Frenzy brings fractional reserve lending baked into the system, for everyone
 
-Individual can loan their tokens to others, what makes this so special?
-Well instead of forking your cash over like a common simpleton, you create the money from nothing and lend, like a commerical bank does for the loans they make.
 
-What stops everyone from printing money ad infinitium? the reserve ratio.
 
-no one may lend outside of the reserve ratio of ~61.8%
 
 ## Spec
 
@@ -18,6 +17,20 @@ no one may lend outside of the reserve ratio of ~61.8%
 - [] getting [this guy](https://www.patreon.com/tarotofkek) to do the design work
 
 ## Build
+```cp .env.example .env```
+```npm install -g ganache-cli``` [ganachi-cli](https://www.npmjs.com/package/ganache-cli)
+```npm install truffle -g``` [truffle](https://github.com/trufflesuite/truffle)
 
- ```npm install -g ganache-cli``` [ganachi-cli](https://www.npmjs.com/package/ganache-cli)
- ```npm install truffle -g``` [truffle](https://github.com/trufflesuite/truffle)
+### Contracts
+```truffle deploy```
+```truffle test```
+
+### Api
+```cd api && npm install```
+```npm run serve```
+
+### web
+```cd web && npm install```
+```npm run serve```
+
+If you have [tmux](https://github.com/tmux/tmux) installed you can one liner start up with ./tmux.sh

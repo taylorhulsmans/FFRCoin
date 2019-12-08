@@ -64,9 +64,31 @@
               v-model="amount"
               :rules="isAmount"
               label="amount to offer"
+              v-on:change="calcInterestRate"
               required
             >
             </v-text-field>
+            <v-text-field 
+              type="number"
+              v-model="interest"
+              :rules="isInterest"
+              label="Interest, Amount to charge for loan"
+              v-on:change="calcInterestRate"
+              required
+            >
+            </v-text-field>
+             <v-chip
+              class='ma-2'
+              color='yellow'
+              text-color="black"
+              >
+              <v-chip
+                left
+                class="yellow darken-4"
+                >{{interestRate}}
+              </v-chip>
+                Interest Rate
+            </v-chip>
         </v-col>
       </v-row>
     </v-container>
@@ -106,6 +128,11 @@ export default {
     isDate: [
       v => !!v || 'An Expiry date is required',
     ],
+    interest: 0,
+    isInterest: [
+      v => !!v || 'How much would you like to charge for this loan?',
+    ],
+    interestRate: 0,
     menu: false,
     //
     alert: false,
@@ -129,8 +156,11 @@ export default {
           this.address,
           this.amount,
           date,
+          this.interest,
         );
-        this.$vueEventBus.$emit('new-loan-confirmed', {offerLoan, date:this.date, amount:this.amount})
+        console.log('pastloan')
+        console.log(offerLoan)
+        this.$vueEventBus.$emit('new-loan-confirmed', {offerLoan, date:this.date, amount:this.amount, interest:this.interest})
         this.mining = false
       } else {
         this.alert = true
@@ -141,6 +171,9 @@ export default {
       const todayPosix = new Date().getTime() / 1000;
       const datePosix = Math.floor(new Date(date).getTime() / 1000);
       this.maxLend = await FFService.calculateAvailable(datePosix);
+    },
+    calcInterestRate() {
+      this.interestRate =  (this.interest / this.amount).toFixed(2);
     }
   },
 };
