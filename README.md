@@ -1,20 +1,11 @@
 
 *WIP*
-Testing on Ropsten at [Fiat Frenzy](fiatfrenzy.ninja)
+Testing on Ropsten at [Fiat Frenzy](http://fiatfrenzy.ninja)
 
 # Fiat Frenzy 777 edition
 ## Permissionless Fractional Reserve Lending
+Welcome to the offical repository of Fiat Frenzy, a living monetary experiment asking the question of what would happen if everyone was allowed to fractionally reserve lend instead of just banking institutions.
 
-
-
-
-
-## Spec
-
-- [] upgraded smart contract from [v1](https://github.com/Joe-mcgee/Fiat-Frenzy)
-- [] a chronjob that will scrape 4chan for gets with eth addresses, and mint tokens for them
-- [] a simple web ui
-- [] getting [this guy](https://www.patreon.com/tarotofkek) to do the design work
 
 ## Build
 ```cp .env.example .env```
