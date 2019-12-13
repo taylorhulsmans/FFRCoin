@@ -27,11 +27,12 @@ export async function getAccount(address) {
     const liabilities = Number(await contract.methods.liabilitiesOf(address).call());
     const assets = Number(await contract.methods.assetsOf(address).call());
     return {
-      balance,
-      liabilities,
-      assets,
+      balance: Number(window.web3.utils.fromWei(balance.toString(), 'ether')),
+      liabilities: Number(window.web3.utils.fromWei(liabilities.toString(), 'ether')),
+      assets: Number(window.web3.utils.fromWei(assets.toString(), 'ether'))
     };
   } catch (e) {
+    console.log(e)
     return e;
   }
 }
@@ -57,9 +58,10 @@ export async function getTimeAdjustedRR(expiry) {
 
 export async function offerLoan(sender, address, amount, posixDate, interest) {
   const contract = await getContract();
-  console.log(contract)
+  const weiAmount = window.web3.utils.toWei(amount.toString(), 'ether')
+  const weiInterest = window.web3.utils.toWei(interest.toString(), 'ether')
   try {
-    return await contract.methods.offerLoan(address, Number(amount), posixDate, Number(interest)).send({ from: sender });
+    return await contract.methods.offerLoan(address, weiAmount, posixDate, weiInterest).send({ from: sender });
   } catch (e) {
     return e;
   }
@@ -86,10 +88,10 @@ export async function getLoans() {
     const result = await contract.methods.getLoan(address[0], debtor, index).call()
     return {
       debtor,
-      amount: result[0],
-      expiry: new Date(result[1]*1000).toISOString().substr(0,10),
+      amount: window.web3.utils.fromWei(result[0].toString(), 'ether'),
+      expiry: new Date(result[1] * 1000).toISOString().substr(0, 10),
       isApproved: result[2],
-      interest: result[3],
+      interest: window.web3.utils.fromWei(result[3].toString(), 'ether'),
     }
   })
   return Promise.all(loans).then((completed) => {
@@ -135,10 +137,10 @@ export async function getDebts() {
     return {
       lendor,
       index,
-      amount: result[0],
+      amount: window.web3.utils.fromWei(result[0].toString(), 'ether'),
       expiry: new Date(result[1]*1000).toISOString().substr(0,10),
       isApproved,
-      interest: result[3]
+      interest: window.web3.utils.fromWei(result[3].toString(), 'ether')
     }
   })
 
@@ -176,7 +178,7 @@ export async function calculateAvailable(
   const address = await addresses();
   const account = await getAccount(address[0]);
   const timeAdjustedRR = await getTimeAdjustedRR(expiry);
-  const not = 10 ** 9;
+  const not = 10 ** 18;
   const decimalRatio = (timeAdjustedRR / not);
   const val = ((decimalRatio) * account.balance) - account.liabilities
   return Math.floor(val)

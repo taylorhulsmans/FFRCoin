@@ -73,9 +73,6 @@ export default {
     };
   },
   beforeCreate() {
-    console.log('beforecreate'
-    )
-    console.log(window.web3.version)
     if (window.web3.version.api == "0.20.7") {
       window.web3 = new Web3(window.web3.currentProvider)
     }
@@ -85,8 +82,6 @@ export default {
     this.$vueEventBus.$on('sign-loan-mined', this.signLoanChange);
     this.$vueEventBus.$on('repay-loan-mined', this.repayLoanChange);
     this.$vueEventBus.$on('minted', this.mintedChange);
-    console.log('before getcontract')
-    console.log(window.web3)
     this.contract = await FFService.getContract();
     this.addresses = await FFService.addresses();
     this.account = await FFService.getAccount(this.addresses[0]);
@@ -99,11 +94,11 @@ export default {
   methods: {
     signLoanChange(event) {
       this.account.balance += Number(event.amount);
-      this.account.liabilities += Number(event.amount);
+      this.account.liabilities += Number(event.amount) + Number(event.interest);
     },
     repayLoanChange(event) {
-      this.account.balance -= Number(event.amount);
-      this.account.liabilities -= Number(event.amount);
+      this.account.balance -= Number(event.amount) + Number(event.interest);
+      this.account.liabilities -= Number(event.amount) + Number(event.interest);
     },
   },
 }

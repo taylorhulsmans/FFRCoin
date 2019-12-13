@@ -53,8 +53,7 @@
           v-if="
             item.isApproved &&
             !item.isMining &&
-            item.amount > 0 &&
-            item.date > new Date()"
+            item.amount > 0"
           @click="repayLoan(item)"
         >
         mdi-cash-refund
@@ -153,7 +152,8 @@ export default {
         iDebt.isApproved = true;
         this.$set(this.debts, debtIndexForSet, iDebt);
         this.$vueEventBus.$emit('sign-loan-mined', {
-          amount: Number(item.amount) + Number(item.interest),
+          amount: Number(item.amount),
+          interest: Number(item.interest),
           item,
         });
       }
@@ -162,12 +162,13 @@ export default {
       let itemIterator = null;
       this.debts.find((debt, i) => {
         if (debt.index === item.index && debt.lendor === item.lendor) {
-          itemIterator = i
-          return true
+          itemIterator = i;
+          return true;
         }
-        return false
+        return false;
       })
       let iDebt = this.debts[itemIterator]
+      console.log(iDebt)
       iDebt.isMining = true
       this.$set(this.debts, itemIterator, iDebt)
       const repayLoan = await FFService.repayLoan(item.lendor, item.index)
@@ -175,7 +176,7 @@ export default {
         iDebt.isMining = false
         this.$set(this.debts, itemIterator, iDebt)
       } else {
-        this.$vueEventBus.$emit('repay-loan-mined', {amount: item.amount})
+        this.$vueEventBus.$emit('repay-loan-mined', {amount: Number(item.amount), interest: Number(item.interest)})
         iDebt.isMining = false
         iDebt.amount = 0
         this.$set(this.debts, itemIterator, iDebt)

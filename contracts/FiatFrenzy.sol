@@ -5,8 +5,10 @@ contract FiatFrenzy  {
   // Coin Meta
   string internal _name;
   string internal _symbol;
+  uint256 internal _decimals;
   uint256 internal _totalSupply;
   uint256 internal _granularity;
+  uint256 internal _wad;
   
   event Sent(
     address indexed from,
@@ -113,7 +115,7 @@ contract FiatFrenzy  {
     uint256 amount
   ) {
     Account memory account = _accounts[lendor];
-    uint256 currentRatio = Helpers.percent(account._liabilities + amount, account._balance, 9);
+    uint256 currentRatio = Helpers.percent(account._liabilities + amount, account._balance, _decimals);
     require(currentRatio <= _reserveRequirement, "apologies, reserve requirement exceeded");
     _;
   }
@@ -124,7 +126,7 @@ contract FiatFrenzy  {
     uint256 expiry
   ) {
     Account memory account = _accounts[lendor];
-    uint256 currentRatio = Helpers.percent(account._liabilities + amount, account._balance, 9);
+    uint256 currentRatio = Helpers.percent(account._liabilities + amount, account._balance, _decimals);
     require(currentRatio <= timeAdjustedRR(expiry), "apologies, reserve requirement exceeded");
     _;
   }
@@ -133,15 +135,17 @@ contract FiatFrenzy  {
     address[] memory defaultOperators
   ) public {
     _name = "Fiat Frenzy";
-    _symbol = "FRENZ";
+    _symbol = "FREN";
     _granularity = 1;
-    _reserveRequirement = Helpers.percent(17167680177565, 27777890035288, 9);
+    _decimals = 18;
+    _wad = 10**_decimals;
+    _reserveRequirement = Helpers.percent(11111460156937785151929026842503960837766832936, 17978720198565577104981084195586024127087428957, _decimals);
     _defaultOperators = defaultOperators;
     for (uint256 i = 0; i < _defaultOperators.length; i++) {
       _isDefaultOperator[_defaultOperators[i]] = true;
     }
     // some test coins, remove for prod
-    _accounts[msg.sender]._balance = 100;
+    _accounts[msg.sender]._balance = 100*_wad;
 
   }
   
@@ -151,6 +155,10 @@ contract FiatFrenzy  {
 
   function symbol() external view returns (string memory) {
     return _symbol;
+  }
+
+  function decimals() external view returns (uint256) {
+    return _decimals;
   }
 
   function reserveRequirement() external view returns (uint256) {
@@ -260,7 +268,7 @@ contract FiatFrenzy  {
         }
     }
     uint256 amount = formGet(last, getFactor);
-    operatorMint(to, amount);
+    operatorMint(to, amount*_wad);
     _usedPostIds[post] = true;
   }
  
@@ -364,7 +372,7 @@ contract FiatFrenzy  {
   ) 
   external {
     Loan storage loan = _loans[lendor][msg.sender][index - 1];
-    require(now >= loan._expiry, 'loans must be expired before they are repaid');
+    //require(now >= loan._expiry, 'loans must be expired before they are repaid');
     Account storage debtorAccount = _accounts[msg.sender];
     Account storage lendorAccount = _accounts[lendor];
     require(

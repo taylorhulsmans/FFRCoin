@@ -1,5 +1,6 @@
 const FiatFrenzy = artifacts.require("FiatFrenzy");
-
+const Web3 = require('web3')
+const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:9545'))
 // Account helper
 
 contract("FiatFrenzy", async (accounts) => {
@@ -27,7 +28,7 @@ contract("FiatFrenzy", async (accounts) => {
 
 	it("should return symbol", async () => {
 		let symbol = await instance.symbol.call();
-		assert.equal("FRNZY", symbol)
+		assert.equal("FREN", symbol)
 	})
 
 	it("should return total Supply", async () => {
@@ -37,7 +38,7 @@ contract("FiatFrenzy", async (accounts) => {
 
 	it("should return balance of", async () => {
 		let balanceOf = await instance.balanceOf.call(accounts[0]);
-		assert.equal(100, Number(balanceOf))
+		assert.equal(100*10**18, Number(balanceOf))
 	})
 
 	it("should return granularity", async () => {
@@ -55,7 +56,7 @@ contract("FiatFrenzy", async (accounts) => {
     let proof = await instance.proofOfMeme.sendTransaction(accounts[1], 123456666, {from:accounts[0]})
     let balance_2 = await instance.balanceOf.call(accounts[1])
     console.log('balance2', Number(balance_2))
-    assert.equal(Number(balance_2) - Number(balance_1), 66)
+    assert.equal(Number(balance_2) - Number(balance_1), 6666)
   })
 	it("should give correct time adjusted RR at a year equal to reserve ratio", async () => {
 		let tarr = await instance.timeAdjustedRR.call(
@@ -72,27 +73,16 @@ contract("FiatFrenzy", async (accounts) => {
 			)))
 		let rr= await instance.reserveRequirement.call()
 		console.log('1 tarr', Number(tarr), 'rr', Number(rr))
-		assert.equal(Number(tarr), 308170226)
+		assert.equal(Number(tarr), 308170372472550200)
 	})
 
 	it("lending should feel restricted for short loans", async () => {
 		let tarr = await instance.timeAdjustedRR.call(
 			Math.floor((new Date().getTime() / 1000)) + (3600*24))
 		console.log('2 tarr', Number(tarr), 'rr')
-		assert.equal(Number(tarr), 1693243)
+    assert.equal(Number(tarr), 1693243804794232)
 	})
 
-	it("should return if operator or not", async () => {
-		// can message sender operator the oracle address?
-		let opOne = await instance.isOperatorFor.call(accounts[0], accounts[1])
-		assert.equal(false, opOne)
-		// can the oracle address operate for message.sender?
-		let opTwo = await instance.isOperatorFor.call(accounts[1], accounts[0])
-		assert.equal(true, opTwo)
-		// can oracle operate for itself
-		let opThree = await instance.isOperatorFor.call(accounts[1], accounts[1])
-		assert.equal(true, opThree)
-	})
 
 	it("set a third party operator as an operator of msg.sender", async () => {
 		// accounts[0] authorizes accounts[2]
@@ -124,10 +114,14 @@ contract("FiatFrenzy", async (accounts) => {
 		assert.equal(false, zeroOpTwo)
 	})
 
-	it("accounts[0] is the only one who can mint tokens", async () => {
-    let mint = await instance.operatorMint.sendTransaction(accounts[0], 100, {from: accounts[0]})
+  it("accounts[0] is the only one who can mint tokens", async () => {
     let balanceOf = await instance.balanceOf.call(accounts[0]);
-    assert.equal(Number(balanceOf), 200)
+    console.log(Number(balanceOf))
+    let deci = 1.1234567
+    let wei = web3.utils.toWei(deci.toString(), 'ether')
+    let mint = await instance.operatorMint.sendTransaction(accounts[0], web3.utils.toBN(wei), {from: accounts[0]})
+    let balanceOf2 = await instance.balanceOf.call(accounts[0]);
+    assert.equal(Number(balanceOf2), 1)
     try {
       let mintHack = await instance.operatorMint.sendTransaction(accounts[0], 100)
     } catch (e) {

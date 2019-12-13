@@ -121,8 +121,7 @@ export default {
     ],
     amount: 0,
     isAmount: [
-      v => !!v || 'An amount to loan is required',
-      v => v % 1 == 0 || 'whole numbers only please'
+      v => !!v || 'An amount to loan is required'
     ],
     date: new Date().toISOString().substr(0, 10),
     isDate: [
@@ -158,8 +157,6 @@ export default {
           date,
           this.interest,
         );
-        console.log('pastloan')
-        console.log(offerLoan)
         this.$vueEventBus.$emit('new-loan-confirmed', {offerLoan, date:this.date, amount:this.amount, interest:this.interest})
         this.mining = false
       } else {
