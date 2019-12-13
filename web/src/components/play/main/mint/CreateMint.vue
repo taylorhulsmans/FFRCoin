@@ -28,7 +28,13 @@
         class="mr-4"
         @click="submitProofOfMeme"
       >Submit Proof of Meme
-      </v-btn> 
+      </v-btn>
+        <v-snackbar
+          v-model="snackbar"
+          color="green"
+        >
+        Alright hopefully this works, funds should deposited shortly, click on the block explorer to see if a tx is executing
+        </v-snackbar>
     </v-container>
   </v-form>
 </template>
@@ -45,10 +51,12 @@ export default {
     isPost: [
       v => !!v || 'post is required',
     ],
+    snackbar: false,
   }),
   methods: {
     async submitProofOfMeme() {
       if (this.valid) {
+        this.snackbar = true;
         let proof = await FFService.proveMemeAndMint(this.thread, this.post)
         if (proof.data.message === 'success') {
           this.$vueEventBus.$emit('mint', {proof})

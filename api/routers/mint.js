@@ -24,14 +24,12 @@ module.exports = (web3) => {
       res.json({message: 'erroria', data: e})
       return
     }
-    console.log(chRes.data)
     let post = chRes.data.posts.find((post) => {
       return post.no == req.body.post
     })
     if (post) {
       const cleanText = post.com.replace(/<\/?[^>]+(>|$)/g, "");
       let addr = cleanText.match(/0x[a-zA-Z0-9]+/)
-      console.log(addr[0])
       if (addr[0]) {
         try {
           const mintRes = await mint(web3, addr[0], req.body.thread, req.body.post)
