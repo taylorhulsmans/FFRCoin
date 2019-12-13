@@ -5,7 +5,7 @@ export async function getContract() {
   if (process.env.NODE_ENV === 'development') {
     addr = '0xD426993bB1984762915B4EC481b66b41d99e7e01'
   } else {
-    addr = '0xA9d0c0ad6749684dC25C2F48AC6049e77a2A2F9A'
+    addr = '0x0207dD259AEC31524427737B28ec84227bb2B17B'
   }
   const {abi} = contractData.default;
   return new window.web3.eth.Contract(abi, addr);
