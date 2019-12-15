@@ -295,6 +295,10 @@ contract FiatFrenzy  {
     _send(to, msg.sender, amount);   
     emit Sent(msg.sender, to, amount, data); 
   }
+  // transfer fn to make metamask happy
+  function transfer(address _to, uint256 _value) external {
+    _send(_to, msg.sender,  _value);
+  }
 
   function offerLoan(
     address debtor,

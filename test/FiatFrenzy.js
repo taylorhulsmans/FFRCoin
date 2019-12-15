@@ -224,6 +224,14 @@ contract("FiatFrenzy", async (accounts) => {
 		assert.equal(assets3.toNumber(), 0)
 	})
 
+  it('can transfer', async () => {
+
+    let wei = web3.utils.toWei('10', 'ether')
+    console.log(instance)
+    let transfer = await instance.transfer(accounts[1], wei)
+
+
+  })
 
 
 })
