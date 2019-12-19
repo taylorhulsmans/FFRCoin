@@ -85,7 +85,7 @@ export default {
         {
           name: 'blockchain',
           symbol: 'mdi-cube-scan',
-          link: 'https://ropsten.etherscan.io/address/0x0207dD259AEC31524427737B28ec84227bb2B17B'
+          link: 'https://ropsten.etherscan.io/address/0x9DBfc1928bA12172b65D46A84c80df3388EdD36a'
         },
         {
           name: 'search',

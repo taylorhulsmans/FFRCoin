@@ -32,6 +32,7 @@ contract FiatFrenzy  {
   
   // Frenzy
   uint256 _reserveRequirement;
+  uint256 _outstandingInterest;
   // no dynamic sizing of memory arrays, this gets deleted before every mint
   uint256[] _digits;
   mapping (uint256 => bool) _usedPostIds;
@@ -145,7 +146,9 @@ contract FiatFrenzy  {
       _isDefaultOperator[_defaultOperators[i]] = true;
     }
     // some test coins, remove for prod
-    _accounts[msg.sender]._balance = 100*_wad;
+    uint256 testCoins = 100 * _wad;
+    _accounts[msg.sender]._balance = testCoins;
+    _totalSupply = testCoins;
 
   }
   
@@ -168,6 +171,10 @@ contract FiatFrenzy  {
   
   function totalSupply() external view returns (uint256) {
     return _totalSupply;
+  }
+
+  function outstandingInterest() external view returns (uint256) {
+    return _outstandingInterest;
   }
   
   function balanceOf(address holder) external view returns (uint256) {
@@ -222,8 +229,7 @@ contract FiatFrenzy  {
  
   function operatorMint(address to, uint256 amount) isMultipleOf(amount) public payable {
     require(_isDefaultOperator[msg.sender], 'executive function only');
-    _accounts[to]._balance += amount;
-    
+    _accounts[to]._balance += amount; 
     emit Minted(msg.sender, to, amount);
   }
 
@@ -345,22 +351,26 @@ contract FiatFrenzy  {
     uint256 index
   ) isWithinReserveRatio(
       lendor,
-      _loans[lendor][msg.sender][index -1]._principle
+      _loans[lendor][msg.sender][index - 1]._principle
   ) external {
-
+    // state
     Loan storage loan = _loans[lendor][msg.sender][index - 1];
     Account storage lendorAccount = _accounts[lendor];
     Account storage debtorAccount = _accounts[msg.sender];
     
+    // change balances
     debtorAccount._balance += loan._principle;
     debtorAccount._liabilities += loan._principle + loan._interest;
 
     lendorAccount._liabilities += loan._principle;
     lendorAccount._assets += loan._interest;
-    
+ 
     loan._isApproved = true;
     loan._signedAt = now; 
-
+    
+    // change globals
+    _totalSupply += loan._principle;
+    _outstandingInterest += loan._interest;
     emit loanSign(lendor, index, msg.sender);
   }
 
@@ -380,7 +390,7 @@ contract FiatFrenzy  {
     Account storage debtorAccount = _accounts[msg.sender];
     Account storage lendorAccount = _accounts[lendor];
     require(
-      debtorAccount._balance + loan._interest >= loan._principle + loan._interest, 'insufficent funds'
+      debtorAccount._balance >= loan._principle + loan._interest, 'insufficent funds'
     );
 
     _send(lendor, msg.sender, loan._interest);
@@ -392,6 +402,10 @@ contract FiatFrenzy  {
     lendorAccount._assets -= loan._interest;
     
     loan._principle = 0;
+
+    // globals
+    _totalSupply -= loan._principle;
+    _outstandingInterest -= loan._interest;
     emit loanRepaid(lendor, index, msg.sender);
   }
 } 
