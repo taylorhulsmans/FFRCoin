@@ -11,7 +11,7 @@ tmux new-session -s $SESSIONNAME \; \
 	split-window -h \; \
 	send-keys "cd api && npm run serve" C-m \;\
 	split-window -h \; \
-	send-keys "ganache-cli -b ${BLOCKSPEED}  --gasLimit=${GASLIMIT}  -m ${MEMNONIC}" C-m \; \
+	send-keys "nvm use 12 && ganache-cli -b ${BLOCKSPEED}  --gasLimit=${GASLIMIT}  -m ${MEMNONIC}" C-m \; \
 
 
 
