@@ -1,9 +1,9 @@
 import axios from 'axios';
-import * as contractData from '../assets/FiatFrenzy.json';
+import * as contractData from '../assets/FREN.json';
 export async function getContract() {
   let addr = null;
   if (process.env.NODE_ENV === 'development') {
-    addr = '0xD426993bB1984762915B4EC481b66b41d99e7e01'
+    addr = '0x5d8f10E404A959030c759A1405c993b2eC708C79'
   } else {
     addr = '0x0207dD259AEC31524427737B28ec84227bb2B17B'
   }
@@ -46,9 +46,10 @@ export async function proveMemeAndMint(thread, post) {
 }
 
 export async function getTimeAdjustedRR(expiry) {
+  const address = await addresses();
   const contract = await getContract();
   try {
-    const adjustedRR = await contract.methods.timeAdjustedRR(expiry).call();
+    const adjustedRR = await contract.methods.timeAdjustedRR(address[0], expiry).call();
     return adjustedRR;
   } catch (e) {
     console.log(e)

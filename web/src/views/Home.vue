@@ -7,18 +7,20 @@
       align="center"
       justify="center">
       <v-col
+        style="max-width: 61.8%"
         align="center"
-        justify="center"><h2>
-          The Federal Reserve Everyone Network is a protocol for enabling permissionless fractional reserve banking.</h2>
+        justify="center"><h3>
+          The Federal Reserve Everyone Network is a protocol for enabling permissionless fractional reserve banking.</h3>
       </v-col>
     </v-row>
     <v-row
       align="center"
       justify="center">
       <v-col
+        style="max-width: 61.8%"
         align="center"
-        justify="center"><h2>
-          FREN attempts to peg 1:1 to DAI, responding to demand by awarding the best lenders with the right to print the most FREN in the form of loans, and to supply with the inverse</h2>
+        justify="center"><h3>
+          FREN attempts to peg 1:1 to DAI, responding to demand by awarding the best lenders with the right to print the most FREN in the form of loans, and to supply with the inverse</h3>
       </v-col>
     </v-row>
   </v-container>

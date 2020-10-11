@@ -3,14 +3,6 @@
     <v-toolbar
       style="overflow-x:scroll"
       dense>
-      
-      <v-btn
-        to="/">
-        <v-toolbar-title>
-          Fiat Frenzy
-        </v-toolbar-title>
-      </v-btn>
-
       <v-btn icon
         v-for="button in leftNav"
         :key="button.name"

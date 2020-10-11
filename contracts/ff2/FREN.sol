@@ -112,8 +112,8 @@ contract FREN is ERC20, ReentrancyGuard {
     daiToken.transferFrom(address(this), msg.sender, amount);
   }
   
-  function daiReserve() public view {
-    return daiToken.balanceOf(address(this))
+  function daiReserve() public view returns (uint256){
+    return daiToken.balanceOf(address(this));
   }
 
   /* Reserve req Mod
@@ -243,5 +243,14 @@ contract FREN is ERC20, ReentrancyGuard {
     emit loanRepaid(lendor, index, msg.sender);
   }
 
+  function assetsOf(address holder) external view returns (uint256) {
+    Account memory account = _accounts[holder];
+    return account.assets;  
+  }
+
+  function liabilitiesOf(address holder) external view returns (uint256) {
+    Account memory account = _accounts[holder];
+    return account.liabilities;  
+  }
 
 }

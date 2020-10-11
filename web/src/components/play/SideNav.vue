@@ -41,11 +41,6 @@ export default {
           component: 'Dashboard',
         },
         {
-          title: 'Mint with Memes',
-          icon: 'mdi-auto-fix',
-          component: 'Mint',
-        },
-        {
           title: 'My Loans',
           icon: 'mdi-cube-send',
           component: 'Loans',
@@ -54,11 +49,6 @@ export default {
           title: 'My Debts',
           icon: 'mdi-bullseye-arrow',
           component: 'Debts',
-        },
-        {
-          title: 'Starred',
-          icon: 'mdi-star',
-          component: 'Starred',
         },
       ],
     };
