@@ -2,7 +2,31 @@ pragma solidity ^0.7.1;
 
 import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 import '@openzeppelin/contracts/math/SafeMath.sol';
+import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
 import './Helpers.sol';
+
+interface DaiToken {
+    function transfer(address dst, uint wad) external returns (bool);
+    function balanceOf(address guy) external view returns (uint);
+    function approve(address spender, uint256 amount) external returns (bool);
+    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
+}
+
+contract owned {
+    DaiToken daitoken;
+    address owner;
+
+    constructor(address dai) public{
+        owner = address(this);
+        daitoken = DaiToken(dai);
+    }
+
+    modifier onlyOwner {
+        require(msg.sender == owner,
+        "Only the contract owner can call this function");
+        _;
+    }
+}
 
 contract DaiMock is ERC20 {
   constructor(uint256 initialSupply) ERC20('Silver', 'SLV') {
@@ -12,9 +36,9 @@ contract DaiMock is ERC20 {
 
 
 
-contract FREN is ERC20 {
-
+contract FREN is ERC20, ReentrancyGuard {
   using SafeMath for uint256;
+  DaiToken daiToken;
   /* State
   *
   *
@@ -66,14 +90,30 @@ contract FREN is ERC20 {
   *
   */
   constructor(
-    uint256 initialSupply
+    address daiAddress
   )
   ERC20(
     'Federal Reserve Everyone Network',
     'FREN'
   )
   {
-    _mint(msg.sender, initialSupply);
+    daiToken = DaiToken(daiAddress);
+  }
+
+  function mintWithDai(
+    uint256 amount
+  ) nonReentrant public  {
+    require(daiToken.balanceOf(msg.sender) >= amount, "dai/insufficint");
+    daiToken.transfer(address(this), amount);
+    _mint(msg.sender, amount);
+  }
+
+  function claimDai(uint256 amount) public {
+    daiToken.transferFrom(address(this), msg.sender, amount);
+  }
+  
+  function daiReserve() public view {
+    return daiToken.balanceOf(address(this))
   }
 
   /* Reserve req Mod
@@ -125,14 +165,6 @@ contract FREN is ERC20 {
   *
   */
 
-  function _beforeTokenTransfer(
-    address sender,
-    address recipient,
-    uint256 amount
-  ) isWithinReserveRatio(sender, amount)
-    internal override { 
-    // meet criterion 
-  }
 
   /* Loans
   *
@@ -192,7 +224,8 @@ contract FREN is ERC20 {
   ) 
   external {
     Loan storage loan = _loans[lendor][msg.sender][index - 1];
-    //require(block.timestamp >= loan._expiry, 'loans must be expired before they are repaid');
+    //uncommented for testing purpose
+    //require(block.timestamp >= loan.expiry, 'loans must be expired before they are repaid');
     Account storage debtorAccount = _accounts[msg.sender];
     uint256  debtorBalance = balanceOf(msg.sender);
     Account storage lendorAccount = _accounts[lendor];

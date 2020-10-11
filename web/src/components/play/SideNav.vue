@@ -1,10 +1,10 @@
 <template>
+
     <v-navigation-drawer
       app
       expand-on-hover
       permanent
-      class="mt-5"
-      style='top: 28px; display: block'
+      clipped
       >
       <v-divider></v-divider>
       <v-list
