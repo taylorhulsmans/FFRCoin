@@ -1,5 +1,18 @@
 import axios from 'axios';
 import * as contractData from '../assets/FREN.json';
+
+
+export async function getDaiContract() {
+  let addr = null;
+  if (process.env.NODE_ENV === 'development') {
+    addr = '0x8D18D79e18D06139884AEeAfdEb09a366B033963'
+  } else {
+    addr = '0x0207dD259AEC31524427737B28ec84227bb2B17B'
+  }
+  const {abi} = contractData.default;
+  return new window.web3.eth.Contract(abi, addr);
+}
+
 export async function getContract() {
   let addr = null;
   if (process.env.NODE_ENV === 'development') {

@@ -12,20 +12,22 @@ interface DaiToken {
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
 }
 
-contract owned {
-    DaiToken daitoken;
-    address owner;
+interface StubUniswapV2Factory {
+    function createPair(address tokenA, address tokenB) external returns (address pair);
+    function getPair(address tokenA, address tokenB) external view returns (address pair);
+}
 
-    constructor(address dai) public{
-        owner = address(this);
-        daitoken = DaiToken(dai);
-    }
-
-    modifier onlyOwner {
-        require(msg.sender == owner,
-        "Only the contract owner can call this function");
-        _;
-    }
+interface StubUniswapV2Router02 {
+  function addLiquidity(
+  address tokenA,
+  address tokenB,
+  uint amountADesired,
+  uint amountBDesired,
+  uint amountAMin,
+  uint amountBMin,
+  address to,
+  uint deadline
+) external returns (uint amountA, uint amountB, uint liquidity);
 }
 
 contract DaiMock is ERC20 {
@@ -34,11 +36,12 @@ contract DaiMock is ERC20 {
   }
 }
 
-
-
 contract FREN is ERC20, ReentrancyGuard {
   using SafeMath for uint256;
   DaiToken daiToken;
+  StubUniswapV2Factory uniswapV2Factory;
+  StubUniswapV2Router02 uniswapV2Router02;
+  address uniswapPairAddress;
   /* State
   *
   *
@@ -90,7 +93,9 @@ contract FREN is ERC20, ReentrancyGuard {
   *
   */
   constructor(
-    address daiAddress
+    address daiAddress,
+    address uniswapV2FactoryAddress,
+    address uniswapV2Router02Address
   )
   ERC20(
     'Federal Reserve Everyone Network',
@@ -98,20 +103,19 @@ contract FREN is ERC20, ReentrancyGuard {
   )
   {
     daiToken = DaiToken(daiAddress);
+    uniswapV2Factory = StubUniswapV2Factory(uniswapV2FactoryAddress);
+    uniswapV2Router02 = StubUniswapV2Router02(uniswapV2Router02Address);
+    uniswapPairAddress = uniswapV2Factory.createPair(daiAddress, address(this));
   }
 
   function mintWithDai(
     uint256 amount
-  ) nonReentrant public  {
-    require(daiToken.balanceOf(msg.sender) >= amount, "dai/insufficint");
+  ) private
+    {
     daiToken.transfer(address(this), amount);
     _mint(msg.sender, amount);
   }
 
-  function claimDai(uint256 amount) public {
-    daiToken.transferFrom(address(this), msg.sender, amount);
-  }
-  
   function daiReserve() public view returns (uint256){
     return daiToken.balanceOf(address(this));
   }
