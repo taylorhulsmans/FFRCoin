@@ -16,7 +16,8 @@ export async function getDaiContract() {
 export async function getContract() {
   let addr = null;
   if (process.env.NODE_ENV === 'development') {
-    addr = '0x5d8f10E404A959030c759A1405c993b2eC708C79'
+    addr = process.env.VUE_APP_FREN_ADDR
+    console.log(addr)
   } else {
     addr = '0x0207dD259AEC31524427737B28ec84227bb2B17B'
   }

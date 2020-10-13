@@ -106,8 +106,9 @@ contract FREN is ERC20, ReentrancyGuard {
     uniswapV2Factory = StubUniswapV2Factory(uniswapV2FactoryAddress);
     uniswapV2Router02 = StubUniswapV2Router02(uniswapV2Router02Address);
     uniswapPairAddress = uniswapV2Factory.createPair(daiAddress, address(this));
-  }
 
+  }
+  
   function mintWithDai(
     uint256 amount
   ) private
@@ -256,5 +257,7 @@ contract FREN is ERC20, ReentrancyGuard {
     Account memory account = _accounts[holder];
     return account.liabilities;  
   }
+
+
 
 }

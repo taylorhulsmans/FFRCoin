@@ -18,9 +18,22 @@ module.exports =  async function(deployer, network, accounts) {
   let initialSupply = web3.utils.toWei('200', 'ether')
   await deployer.deploy(DaiMock, initialSupply);
   daiInstance = await DaiMock.deployed()
+  await daiInstance.transfer.sendTransaction(FREN.address, initialSupply)
   let HelperDeploy = await deployer.deploy(Helpers);
   deployer.link(Helpers, FREN);
+  console.log(FREN.address)
   await deployer.deploy(FREN, DaiMock.address, uniswapFactoryInstance.address, uniswapRouterInstance.address)
+    /*await uniswapRouterInstance.addLiquidity.sendTransaction(
+    FREN.address,
+    DaiMock.address,
+    1,
+    1,
+    1,
+    1,
+    FREN.address,
+    Math.round(Date.now() / 1000) + 3600
+  )
+  */
   frenInstance = await FREN.deployed()
   
   
