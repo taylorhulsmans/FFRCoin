@@ -32,15 +32,14 @@ contract("FREN", async (accounts) => {
 
   })
 
-  it("should have 100 dai inside", async () => {
-    let fren_dai_0 = await balance(mockDaiInstance, accounts[0])
-    assert.equal(fren_dai_0, 200)
-    let transfer = await mockDaiInstance.transfer.sendTransaction(
-      FREN.address,
-      web3.utils.toWei('100', 'ether')
-    )
-    let fren_dai_1 = await balance(mockDaiInstance, accounts[0])
-    assert.equal(fren_dai_1, 100)
+  it("should have equal fren and dai inside", async () => {
+    let fren_dai_0 = await balance(mockDaiInstance, FREN.address)
+    let fren_fren_0 = await balance(frenInstance, FREN.address)
+    assert.equal(fren_dai_0, fren_fren_0)
+  })
+
+  it("should mint 50 FREN with 50 DAI", async () => {
+    
   })
 })
 
