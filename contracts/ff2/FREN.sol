@@ -93,6 +93,7 @@ contract FREN is ERC20, ReentrancyGuard {
   *
   */
   constructor(
+    uint256 initialAmount,
     address daiAddress,
     address uniswapV2FactoryAddress,
     address uniswapV2Router02Address
@@ -104,7 +105,7 @@ contract FREN is ERC20, ReentrancyGuard {
   {
     daiToken = DaiToken(daiAddress);
     uint256 dai = daiToken.balanceOf(address(this));
-    _mint(address(this), dai);
+    _mint(msg.sender, initialAmount);
     uniswapV2Factory = StubUniswapV2Factory(uniswapV2FactoryAddress);
     uniswapPairAddress = uniswapV2Factory.createPair(daiAddress, address(this));
   }
