@@ -4,10 +4,12 @@ var DaiMock = artifacts.require('DaiMock')
 var AdvancedWETH = artifacts.require('AdvancedWETH')
 var UniswapV2Factory = artifacts.require('UniswapV2Factory')
 var UniswapV2Router02 = artifacts.require('UniswapV2Router02')
+var UniswapV2Library = artifacts.require('UniswapV2Library')
 let kovanDai = '0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa'
 const RLP = require('rlp')
+const keccak = require('keccak')
 const Web3 = require('web3')
-const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:9545'))
+const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'))
 
 
 
@@ -28,11 +30,25 @@ async function balance(instance, account) {
   )
 }
 
+function frenAddr(sender, nonce) {
+  var input_arr = [ sender, nonce ];
+  var rlp_encoded = RLP.encode(input_arr)
+
+  var contract_address_long = keccak('keccak256').update(rlp_encoded).digest('hex');
+  return contract_address_long.substring(24); //Trim the first 24 characters.
+  
+}
+
+
 
 module.exports =  async function(deployer, network, accounts) {
+  let HelperDeploy = await deployer.deploy(Helpers);
+  deployer.link(Helpers, FREN);
+
   await deployer.deploy(AdvancedWETH, accounts[0])
   wethInstance = await AdvancedWETH.deployed()
 
+  await deployer.deploy(UniswapV2Library)
   await deployer.deploy(UniswapV2Factory, accounts[0])
   uniswapFactoryInstance = await UniswapV2Factory.deployed()
 
@@ -44,27 +60,30 @@ module.exports =  async function(deployer, network, accounts) {
   // 200 dai minted to msg.sender
   await deployer.deploy(DaiMock, initial);
   daiInstance = await DaiMock.deployed()
-  console.log(await balance(daiInstance, accounts[0]))
   // give half to fren
-  await daiInstance.transfer.sendTransaction(FREN.address, halfInitial)
-  console.log(await balance(daiInstance, accounts[0]))
-  console.log(await balance(daiInstance, FREN.address))
-
+  //
+  //
   await daiInstance.approve.sendTransaction(UniswapV2Router02.address, initial)
-  let HelperDeploy = await deployer.deploy(Helpers);
-  deployer.link(Helpers, FREN);
+
+
+  let nonce = await web3.eth.getTransactionCount(accounts[0], 'pending')
+  nonce = nonce + 1
+  let frenFutureAddress = frenAddr(
+    accounts[0],
+    nonce
+  )
+  console.log(frenFutureAddress)
+  await daiInstance.transfer.sendTransaction(frenFutureAddress, halfInitial)
+
 
   await deployer.deploy(FREN, halfInitial, DaiMock.address, uniswapFactoryInstance.address, uniswapRouterInstance.address)
   frenInstance = await FREN.deployed()
 
   let balance_fren = await balance(frenInstance, accounts[0])
-  console.log(balance_fren)
 
   await frenInstance.approve.sendTransaction(UniswapV2Router02.address, initial)
   // createLiquidity
   //
-  console.log(await allowance(daiInstance, accounts[0], UniswapV2Router02.address))
-  console.log(await allowance(frenInstance, accounts[0], UniswapV2Router02.address))
   await uniswapRouterInstance.addLiquidity(
     DaiMock.address,
     FREN.address,
