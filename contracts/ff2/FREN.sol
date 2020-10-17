@@ -30,6 +30,10 @@ interface StubUniswapV2Router02 {
 ) external returns (uint amountA, uint amountB, uint liquidity);
 }
 
+interface StubSlidingWindowOracle {
+  function update(address tokenA, address tokenB) external;
+}
+
 contract DaiMock is ERC20 {
   constructor(uint256 initialSupply) ERC20('Silver', 'SLV') {
     _mint(msg.sender, initialSupply);
@@ -38,10 +42,19 @@ contract DaiMock is ERC20 {
 
 contract FREN is ERC20, ReentrancyGuard {
   using SafeMath for uint256;
+  
+  /* Integrations
+  *
+  *
+  */
   DaiToken daiToken;
+  address daiAddress;
+
   StubUniswapV2Factory uniswapV2Factory;
   StubUniswapV2Router02 uniswapV2Router02;
+  StubSlidingWindowOracle slidingWindowOracle;
   address uniswapPairAddress;
+  
   /* State
   *
   *
@@ -54,6 +67,7 @@ contract FREN is ERC20, ReentrancyGuard {
     uint256 outstandingInterest;
   }
   mapping (address => Account) _accounts;
+
   struct Loan {
     uint256 principle;
     uint256 expiry;
@@ -70,7 +84,6 @@ contract FREN is ERC20, ReentrancyGuard {
   *
   *
   */
-
   event loanOffer(
     address indexed lendor,
     uint256 indexed index,
@@ -96,7 +109,8 @@ contract FREN is ERC20, ReentrancyGuard {
     uint256 initialAmount,
     address daiAddress,
     address uniswapV2FactoryAddress,
-    address uniswapV2Router02Address
+    address uniswapV2Router02Address,
+    address slidingWindowOracleAddress
   )
   ERC20(
     'Federal Reserve Everyone Network',
@@ -104,17 +118,13 @@ contract FREN is ERC20, ReentrancyGuard {
   )
   {
     daiToken = DaiToken(daiAddress);
+    daiAddress = daiAddress;
     uint256 dai = daiToken.balanceOf(address(this));
     _mint(msg.sender, initialAmount);
     uniswapV2Factory = StubUniswapV2Factory(uniswapV2FactoryAddress);
     uniswapPairAddress = uniswapV2Factory.createPair(daiAddress, address(this));
-  }
-  function mintWithDai(
-    uint256 amount
-  ) private
-    {
-    daiToken.transfer(address(this), amount);
-    _mint(msg.sender, amount);
+    slidingWindowOracle = StubSlidingWindowOracle(slidingWindowOracleAddress);
+
   }
 
   function daiReserve() public view returns (uint256){
@@ -124,6 +134,11 @@ contract FREN is ERC20, ReentrancyGuard {
   /* Reserve req Mod
   *
   */
+
+  function update() internal {
+    slidingWindowOracle.update(daiAddress, address(this));
+
+  }
  
   function timeAdjustedRR(
     address account,
@@ -169,6 +184,11 @@ contract FREN is ERC20, ReentrancyGuard {
   /* Overrides
   *
   */
+ 
+  function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override { 
+
+    slidingWindowOracle.update(daiAddress, address(this));
+  }
 
 
   /* Loans
@@ -220,6 +240,8 @@ contract FREN is ERC20, ReentrancyGuard {
     _mint(msg.sender, loan.principle);
     // change globals
     //_outstandingInterest += loan.interest;
+
+    slidingWindowOracle.update(daiAddress, address(this));
     emit loanSign(lendor, index, msg.sender);
   }
   

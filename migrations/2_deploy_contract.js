@@ -5,6 +5,7 @@ var AdvancedWETH = artifacts.require('AdvancedWETH')
 var UniswapV2Factory = artifacts.require('UniswapV2Factory')
 var UniswapV2Router02 = artifacts.require('UniswapV2Router02')
 var UniswapV2Library = artifacts.require('UniswapV2Library')
+var ExampleSlidingWindowOracle = artifacts.require('ExampleSlidingWindowOracle')
 let kovanDai = '0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa'
 const RLP = require('rlp')
 const keccak = require('keccak')
@@ -65,6 +66,9 @@ module.exports =  async function(deployer, network, accounts) {
   //
   await daiInstance.approve.sendTransaction(UniswapV2Router02.address, initial)
 
+  //https://github.com/Uniswap/uniswap-v2-periphery/blob/master/contracts/examples/ExampleSlidingWindowOracle.sol#L28
+  await deployer.deploy(ExampleSlidingWindowOracle, uniswapFactoryInstance.address, 24, 24)
+  exampleSlidingWindowOracleInstance = await ExampleSlidingWindowOracle.deployed()
 
   let nonce = await web3.eth.getTransactionCount(accounts[0], 'pending')
   nonce = nonce + 1
@@ -76,7 +80,7 @@ module.exports =  async function(deployer, network, accounts) {
   await daiInstance.transfer.sendTransaction(frenFutureAddress, halfInitial)
 
 
-  await deployer.deploy(FREN, halfInitial, DaiMock.address, uniswapFactoryInstance.address, uniswapRouterInstance.address)
+  await deployer.deploy(FREN, halfInitial, DaiMock.address, uniswapFactoryInstance.address, uniswapRouterInstance.address, exampleSlidingWindowOracleInstance.address )
   frenInstance = await FREN.deployed()
 
   let balance_fren = await balance(frenInstance, accounts[0])
@@ -94,6 +98,10 @@ module.exports =  async function(deployer, network, accounts) {
     accounts[0],
     Math.floor(Date.now() / 1000) + 3600
   )
+
+
+
+  
   
   
   
