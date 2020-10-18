@@ -64,7 +64,7 @@ module.exports =  async function(deployer, network, accounts) {
   // give half to fren
   //
   //
-  await daiInstance.approve.sendTransaction(UniswapV2Router02.address, initial)
+  await daiInstance.approve.sendTransaction(UniswapV2Router02.address, halfInitial)
 
   //https://github.com/Uniswap/uniswap-v2-periphery/blob/master/contracts/examples/ExampleSlidingWindowOracle.sol#L28
   await deployer.deploy(ExampleSlidingWindowOracle, uniswapFactoryInstance.address, 24, 24)
@@ -76,21 +76,22 @@ module.exports =  async function(deployer, network, accounts) {
     accounts[0],
     nonce
   )
-  console.log(frenFutureAddress)
+  console.log('future', frenFutureAddress)
   await daiInstance.transfer.sendTransaction(frenFutureAddress, halfInitial)
 
-
-  await deployer.deploy(FREN, halfInitial, DaiMock.address, uniswapFactoryInstance.address, uniswapRouterInstance.address, exampleSlidingWindowOracleInstance.address )
+  await deployer.deploy(FREN, halfInitial, daiInstance.address, uniswapFactoryInstance.address, uniswapRouterInstance.address, exampleSlidingWindowOracleInstance.address )
   frenInstance = await FREN.deployed()
-
   let balance_fren = await balance(frenInstance, accounts[0])
-
-  await frenInstance.approve.sendTransaction(UniswapV2Router02.address, initial)
+  let balance_dai = await balance(daiInstance, accounts[0])
+  console.log(balance_fren, balance_dai)
+  await frenInstance.approve.sendTransaction(UniswapV2Router02.address, halfInitial)
   // createLiquidity
   //
+  console.log(await allowance(daiInstance, accounts[0], UniswapV2Router02.address))
+  console.log(await allowance(frenInstance, accounts[0], UniswapV2Router02.address))
   await uniswapRouterInstance.addLiquidity(
-    DaiMock.address,
-    FREN.address,
+    daiInstance.address,
+    frenInstance.address,
     halfInitial,
     halfInitial,
     0,

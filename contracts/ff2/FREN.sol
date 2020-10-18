@@ -31,6 +31,8 @@ interface StubUniswapV2Router02 {
 }
 
 interface StubSlidingWindowOracle {
+  function pairObservations(address swap, uint8 index) external view returns (uint256 timestamp, uint256 cumulativeP0, uint256 cumulativeP1);
+  function observationIndexOf(uint timestamp) external view returns (uint8 index);
   function update(address tokenA, address tokenB) external;
 }
 
@@ -49,6 +51,7 @@ contract FREN is ERC20, ReentrancyGuard {
   */
   DaiToken daiToken;
   address daiAddress;
+  address frenAddress;
 
   StubUniswapV2Factory uniswapV2Factory;
   StubUniswapV2Router02 uniswapV2Router02;
@@ -119,11 +122,12 @@ contract FREN is ERC20, ReentrancyGuard {
   {
     daiToken = DaiToken(daiAddress);
     daiAddress = daiAddress;
+    frenAddress = address(this);
     uint256 dai = daiToken.balanceOf(address(this));
-    _mint(msg.sender, initialAmount);
     uniswapV2Factory = StubUniswapV2Factory(uniswapV2FactoryAddress);
     uniswapPairAddress = uniswapV2Factory.createPair(daiAddress, address(this));
     slidingWindowOracle = StubSlidingWindowOracle(slidingWindowOracleAddress);
+    _mint(msg.sender, initialAmount);
 
   }
 
@@ -136,7 +140,20 @@ contract FREN is ERC20, ReentrancyGuard {
   */
 
   function update() internal {
-    slidingWindowOracle.update(daiAddress, address(this));
+    uint8 pairIndex = slidingWindowOracle.observationIndexOf(block.timestamp);
+    if (pairIndex >= 1) {
+      (uint timestamp_t_1, uint fren_t_1, uint dai_t_1 ) = slidingWindowOracle.pairObservations(uniswapPairAddress, pairIndex);
+      (uint timestamp_t_0, uint fren_t_0, uint dai_t_0 ) = slidingWindowOracle.pairObservations(uniswapPairAddress, pairIndex);
+    }
+
+    slidingWindowOracle.update(address(this), daiAddress);
+
+
+    // determine price vector t_0 and t_1
+    // if (+)
+    // reduce reserve requirement so the money multiplier re balances to 1:1
+    // if (-)
+    // tighten reserve requirement to the mony multiple re balances to 1:1
 
   }
  
@@ -185,11 +202,6 @@ contract FREN is ERC20, ReentrancyGuard {
   *
   */
  
-  function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override { 
-
-    slidingWindowOracle.update(daiAddress, address(this));
-  }
-
 
   /* Loans
   *
