@@ -1,4 +1,5 @@
 var Helpers = artifacts.require('Helpers');
+var Fixidity = artifacts.require('Fixidity')
 var FREN = artifacts.require('FREN')
 var DaiMock = artifacts.require('DaiMock')
 var AdvancedWETH = artifacts.require('AdvancedWETH')
@@ -43,6 +44,8 @@ function frenAddr(sender, nonce) {
 
 
 module.exports =  async function(deployer, network, accounts) {
+  let FixidityDeploy = await deployer.deploy(Fixidity);
+  deployer.link(Fixidity, FREN);
   let HelperDeploy = await deployer.deploy(Helpers);
   deployer.link(Helpers, FREN);
 

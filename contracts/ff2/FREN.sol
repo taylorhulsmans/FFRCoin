@@ -4,12 +4,17 @@ import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 import '@openzeppelin/contracts/math/SafeMath.sol';
 import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
 import './Helpers.sol';
+import './Fixidity.sol';
 
 interface DaiToken {
     function transfer(address dst, uint wad) external returns (bool);
     function balanceOf(address guy) external view returns (uint);
     function approve(address spender, uint256 amount) external returns (bool);
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
+}
+
+interface IUniswapV2Pair {
+  function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast);
 }
 
 interface StubUniswapV2Factory {
@@ -62,6 +67,8 @@ contract FREN is ERC20, ReentrancyGuard {
   *
   *
   */
+  uint _reserveRequirement;
+
   struct Account {
     uint256 reserveRequirement;
     uint256 newAccountOutflowRestrictor;
@@ -128,6 +135,7 @@ contract FREN is ERC20, ReentrancyGuard {
     uniswapPairAddress = uniswapV2Factory.createPair(daiAddress, address(this));
     slidingWindowOracle = StubSlidingWindowOracle(slidingWindowOracleAddress);
     _mint(msg.sender, initialAmount);
+    _reserveRequirement = 1 * ERC20.decimals();
 
   }
 
@@ -140,14 +148,64 @@ contract FREN is ERC20, ReentrancyGuard {
   */
 
   function update() internal {
+    /* (1 / rr)*total_supply = total_supply + diff
+    * internal system tracts 1 - rr for easier comparison in modifiers
+    * system not 100% sensitive, moves at 1 / 24 th 
+    */
     uint8 pairIndex = slidingWindowOracle.observationIndexOf(block.timestamp);
-    if (pairIndex >= 1) {
-      (uint timestamp_t_1, uint fren_t_1, uint dai_t_1 ) = slidingWindowOracle.pairObservations(uniswapPairAddress, pairIndex);
-      (uint timestamp_t_0, uint fren_t_0, uint dai_t_0 ) = slidingWindowOracle.pairObservations(uniswapPairAddress, pairIndex);
+    slidingWindowOracle.update(address(this), daiAddress);
+    
+    if (pairIndex == 0) { return; } // pass first delta
+    int reserveMultiplier_t_0 = Fixidity.subtract(
+      1,
+      Fixidity.reciprocal(int(_reserveRequirement))
+    );
+    
+    (
+      uint fren_reserve,
+      uint dai_reserve,
+      uint last_block_timestap
+    ) = IUniswapV2Pair(
+      Helpers.pairFor(
+        address(uniswapV2Factory),
+        address(daiToken),
+        address(this)
+      )
+    ).getReserves();
+    if (fren_reserve <= dai_reserve) {
+     uint difference = dai_reserve - fren_reserve;
+     int reserveMultiplier_t_1 = Fixidity.divide(int(difference), int(ERC20.totalSupply())) + 1;
+     int reserveMulDiff = Fixidity.subtract(reserveMultiplier_t_1, reserveMultiplier_t_0);
+     int delta = Fixidity.divide(reserveMulDiff, 24);
+     reserveMultiplier_t_1 = Fixidity.subtract(
+      reserveMultiplier_t_1,
+      delta
+     );
+     _reserveRequirement = uint(Fixidity.subtract(
+       1,
+       Fixidity.reciprocal(reserveMultiplier_t_1)
+     ));
+    } else {
+
+     uint difference = fren_reserve - dai_reserve;
+    }
+    /*
+    (uint timestamp_t_1, uint fren_t_1, uint dai_t_1 ) = slidingWindowOracle.pairObservations(uniswapPairAddress, pairIndex);
+    int pair_t_1 = Fixidity.divide(int(fren_t_1), int(dai_t_1));
+    
+    (uint timestamp_t_0, uint fren_t_0, uint dai_t_0 ) = slidingWindowOracle.pairObservations(uniswapPairAddress, pairIndex--);
+    int pair_t_0 = Fixidity.divide(int(fren_t_0), int(dai_t_0));
+    if (pair_t_1 >= pair_t_0) { // (+)
+      uint256 frenShortage = 
+      // changeReserveRatio to send back to 1
+
+
+      uint multiplier = Helpers.percent(1 * ERC20.decimals(), _reserveRequirement, ERC20.decimals());
+    } else { // (-) 
+      
     }
 
-    slidingWindowOracle.update(address(this), daiAddress);
-
+    */
 
     // determine price vector t_0 and t_1
     // if (+)
@@ -172,7 +230,7 @@ contract FREN is ERC20, ReentrancyGuard {
       uint256 increment = relevantAccount.reserveRequirement / 365;
       return daysTillExpiry*increment;
     }
-    return relevantAccount.reserveRequirement;
+    return _reserveRequirement;
   }
 
   modifier isWithinReserveRatio(
@@ -182,7 +240,7 @@ contract FREN is ERC20, ReentrancyGuard {
     Account memory account = _accounts[lendor];
     uint256 balance = balanceOf(lendor);
     uint256 currentRatio = Helpers.percent(account.liabilities + amount, balance, 18);
-    require(currentRatio <= account.reserveRequirement, "apologies, reserve requirement exceeded");
+    require(currentRatio <= _reserveRequirement, "apologies, reserve requirement exceeded");
     _;
   }
 
