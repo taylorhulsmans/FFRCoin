@@ -1,28 +1,57 @@
 {
-  "contractName": "UniswapV2Factory",
+  "contractName": "SlidingWindowOracle",
   "abi": [
     {
       "inputs": [
         {
           "internalType": "address",
-          "name": "tokenA",
+          "name": "swap",
           "type": "address"
         },
         {
-          "internalType": "address",
-          "name": "tokenB",
-          "type": "address"
+          "internalType": "uint8",
+          "name": "index",
+          "type": "uint8"
         }
       ],
-      "name": "createPair",
+      "name": "pairObservations",
       "outputs": [
         {
-          "internalType": "address",
-          "name": "pair",
-          "type": "address"
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "cumulativeP0",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "cumulativeP1",
+          "type": "uint256"
         }
       ],
-      "stateMutability": "nonpayable",
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        }
+      ],
+      "name": "observationIndexOf",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "index",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -38,19 +67,13 @@
           "type": "address"
         }
       ],
-      "name": "getPair",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "pair",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
+      "name": "update",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.7.1+commit.f4a555be\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"tokenA\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenB\",\"type\":\"address\"}],\"name\":\"createPair\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"pair\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"tokenA\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenB\",\"type\":\"address\"}],\"name\":\"getPair\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"pair\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/taylor/ff2/contracts/ff2/Stub.sol\":\"UniswapV2Factory\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/taylor/ff2/contracts/ff2/Stub.sol\":{\"keccak256\":\"0xb7bcc2ccb9ba4b88eaeb2e0c4ac5d3d37f8e59c4d5bbbd1c17ef1a7ad081ff26\",\"urls\":[\"bzz-raw://3f331219e49e4d0ca76aa97c2dc0b8cd28808743f5f40af25390dbb8741a91be\",\"dweb:/ipfs/QmY5EhY4CyZrN7hZMUpQiRbo1bA285z6BMHSuHB1w6Nvfs\"]}},\"version\":1}",
+  "metadata": "{\"compiler\":{\"version\":\"0.7.1+commit.f4a555be\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"observationIndexOf\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"index\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"swap\",\"type\":\"address\"},{\"internalType\":\"uint8\",\"name\":\"index\",\"type\":\"uint8\"}],\"name\":\"pairObservations\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"cumulativeP0\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"cumulativeP1\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"tokenA\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"tokenB\",\"type\":\"address\"}],\"name\":\"update\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/taylor/ff2/contracts/ff2/Stub.sol\":\"SlidingWindowOracle\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/taylor/ff2/contracts/ff2/Stub.sol\":{\"keccak256\":\"0xb7bcc2ccb9ba4b88eaeb2e0c4ac5d3d37f8e59c4d5bbbd1c17ef1a7ad081ff26\",\"urls\":[\"bzz-raw://3f331219e49e4d0ca76aa97c2dc0b8cd28808743f5f40af25390dbb8741a91be\",\"dweb:/ipfs/QmY5EhY4CyZrN7hZMUpQiRbo1bA285z6BMHSuHB1w6Nvfs\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "immutableReferences": {},
@@ -3082,238 +3105,9 @@
     "name": "solc",
     "version": "0.7.1+commit.f4a555be.Emscripten.clang"
   },
-  "networks": {
-    "1602508147765": {
-      "events": {
-        "0x0d3648bd0f6ba80134a33ba9275ac585d9d315f0ad8355cddefde31afa28d0e9": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "token0",
-              "type": "address"
-            },
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "token1",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "internalType": "address",
-              "name": "pair",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "",
-              "type": "uint256"
-            }
-          ],
-          "name": "PairCreated",
-          "type": "event"
-        }
-      },
-      "links": {},
-      "address": "0xb3C70ca99A209fd5BD6111408c19510e27Fc33D6",
-      "transactionHash": "0x346e588dba3efb1a91eadae535672fb38297efea91623fedbe0fbf31fe6b24f6"
-    },
-    "1602692110412": {
-      "events": {
-        "0x0d3648bd0f6ba80134a33ba9275ac585d9d315f0ad8355cddefde31afa28d0e9": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "token0",
-              "type": "address"
-            },
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "token1",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "internalType": "address",
-              "name": "pair",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "",
-              "type": "uint256"
-            }
-          ],
-          "name": "PairCreated",
-          "type": "event"
-        }
-      },
-      "links": {},
-      "address": "0x71C2d0e40580b6fFD34b9BeFbD110aB0a3D89456",
-      "transactionHash": "0x4a729a10bb738479f387b6b002ecb036745c7ec23c200d867b8ada9818e5decb"
-    },
-    "1602775469341": {
-      "events": {
-        "0x0d3648bd0f6ba80134a33ba9275ac585d9d315f0ad8355cddefde31afa28d0e9": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "token0",
-              "type": "address"
-            },
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "token1",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "internalType": "address",
-              "name": "pair",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "",
-              "type": "uint256"
-            }
-          ],
-          "name": "PairCreated",
-          "type": "event"
-        }
-      },
-      "links": {},
-      "address": "0x6Dc5F72e859b47E5263C4a910849625394e0312C",
-      "transactionHash": "0xd7dcb80df2b645c137d8c52391cf69b08b890615af6654f546c2d551eca584e9"
-    },
-    "1602776619614": {
-      "events": {
-        "0x0d3648bd0f6ba80134a33ba9275ac585d9d315f0ad8355cddefde31afa28d0e9": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "token0",
-              "type": "address"
-            },
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "token1",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "internalType": "address",
-              "name": "pair",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "",
-              "type": "uint256"
-            }
-          ],
-          "name": "PairCreated",
-          "type": "event"
-        }
-      },
-      "links": {},
-      "address": "0xcA0E54AF997031Db435557A1FfAb91F831e8ba29",
-      "transactionHash": "0x2bf280d9b5952db3afbb3eb40d87b0cc2758566e509cb671ec867d28c3fd07fb"
-    },
-    "1602878600205": {
-      "events": {
-        "0x0d3648bd0f6ba80134a33ba9275ac585d9d315f0ad8355cddefde31afa28d0e9": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "token0",
-              "type": "address"
-            },
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "token1",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "internalType": "address",
-              "name": "pair",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "",
-              "type": "uint256"
-            }
-          ],
-          "name": "PairCreated",
-          "type": "event"
-        }
-      },
-      "links": {},
-      "address": "0xB98aE79878A8df049f90FF8289cA668c825B8249",
-      "transactionHash": "0x1d42f064dda9d438dff8cc01760d215d934a2c3cabac5a62992e92d6359244aa"
-    },
-    "1602970612024": {
-      "events": {
-        "0x0d3648bd0f6ba80134a33ba9275ac585d9d315f0ad8355cddefde31afa28d0e9": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "token0",
-              "type": "address"
-            },
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "token1",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "internalType": "address",
-              "name": "pair",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "",
-              "type": "uint256"
-            }
-          ],
-          "name": "PairCreated",
-          "type": "event"
-        }
-      },
-      "links": {},
-      "address": "0x8d869cBcB6f203E24076fc09C1330F0cfAa28609",
-      "transactionHash": "0x0ab96d97f67ae516e0c0682430ac077c4b0ae080eb447142e266863e9eae1cb9"
-    }
-  },
+  "networks": {},
   "schemaVersion": "3.3.0",
-  "updatedAt": "2020-10-19T17:03:14.753Z",
+  "updatedAt": "2020-10-19T17:03:14.746Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},

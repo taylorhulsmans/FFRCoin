@@ -10,7 +10,6 @@ const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:9545'))
 contract("FREN", async (accounts) => {
   let mockDaiInstance;
   let frenInstance;
-  let uniLib;
 
 
   async function balance(instance, account) {

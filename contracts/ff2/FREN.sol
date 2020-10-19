@@ -3,49 +3,10 @@ pragma solidity ^0.7.1;
 import '@openzeppelin/contracts/token/ERC20/ERC20.sol';
 import '@openzeppelin/contracts/math/SafeMath.sol';
 import '@openzeppelin/contracts/utils/ReentrancyGuard.sol';
+
 import './Helpers.sol';
-import './Fixidity.sol';
-
-interface DaiToken {
-    function transfer(address dst, uint wad) external returns (bool);
-    function balanceOf(address guy) external view returns (uint);
-    function approve(address spender, uint256 amount) external returns (bool);
-    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
-}
-
-interface IUniswapV2Pair {
-  function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast);
-}
-
-interface StubUniswapV2Factory {
-    function createPair(address tokenA, address tokenB) external returns (address pair);
-    function getPair(address tokenA, address tokenB) external view returns (address pair);
-}
-
-interface StubUniswapV2Router02 {
-  function addLiquidity(
-  address tokenA,
-  address tokenB,
-  uint amountADesired,
-  uint amountBDesired,
-  uint amountAMin,
-  uint amountBMin,
-  address to,
-  uint deadline
-) external returns (uint amountA, uint amountB, uint liquidity);
-}
-
-interface StubSlidingWindowOracle {
-  function pairObservations(address swap, uint8 index) external view returns (uint256 timestamp, uint256 cumulativeP0, uint256 cumulativeP1);
-  function observationIndexOf(uint timestamp) external view returns (uint8 index);
-  function update(address tokenA, address tokenB) external;
-}
-
-contract DaiMock is ERC20 {
-  constructor(uint256 initialSupply) ERC20('Silver', 'SLV') {
-    _mint(msg.sender, initialSupply);
-  }
-}
+import './DecimalMath.sol';
+import * as Stub from './Stub.sol';
 
 contract FREN is ERC20, ReentrancyGuard {
   using SafeMath for uint256;
@@ -54,24 +15,26 @@ contract FREN is ERC20, ReentrancyGuard {
   *
   *
   */
-  DaiToken daiToken;
-  address daiAddress;
-  address frenAddress;
-
-  StubUniswapV2Factory uniswapV2Factory;
-  StubUniswapV2Router02 uniswapV2Router02;
-  StubSlidingWindowOracle slidingWindowOracle;
-  address uniswapPairAddress;
+  Stub.DaiToken daiToken;
+  Stub.UniswapV2Factory uniswapV2Factory;
+  Stub.UniswapV2Router02 uniswapV2Router02;
+  Stub.SlidingWindowOracle slidingWindowOracle;
+  address public uniswapPairAddress;
   
   /* State
   *
   *
   */
-  uint _reserveRequirement;
+
+  // an account may not loan past (Assets / Liabilities)*(credibilityPoints/TotalCredibilityPoints)
+  // this is their share of money printing, a proportion of the global reserve requirement whose size is based on being atop the leaderboard
+  // is fixed point with 18 decimals
+  uint public reserveRequirement;
+  uint public totalCredibilityPoints;
 
   struct Account {
-    uint256 reserveRequirement;
-    uint256 newAccountOutflowRestrictor;
+    uint256 credibilityPoints;
+    //uint256 newAccountOutflowRestrictor;
     uint256 assets;
     uint256 liabilities;
     uint256 outstandingInterest;
@@ -127,15 +90,12 @@ contract FREN is ERC20, ReentrancyGuard {
     'FREN'
   )
   {
-    daiToken = DaiToken(daiAddress);
-    daiAddress = daiAddress;
-    frenAddress = address(this);
-    uint256 dai = daiToken.balanceOf(address(this));
-    uniswapV2Factory = StubUniswapV2Factory(uniswapV2FactoryAddress);
+    daiToken = Stub.DaiToken(daiAddress);
+    uniswapV2Factory = Stub.UniswapV2Factory(uniswapV2FactoryAddress);
     uniswapPairAddress = uniswapV2Factory.createPair(daiAddress, address(this));
-    slidingWindowOracle = StubSlidingWindowOracle(slidingWindowOracleAddress);
+    slidingWindowOracle = Stub.SlidingWindowOracle(slidingWindowOracleAddress);
     _mint(msg.sender, initialAmount);
-    _reserveRequirement = 1 * ERC20.decimals();
+    reserveRequirement = DecimalMath.unit(ERC20.decimals());
 
   }
 
@@ -152,20 +112,25 @@ contract FREN is ERC20, ReentrancyGuard {
     * internal system tracts 1 - rr for easier comparison in modifiers
     * system not 100% sensitive, moves at 1 / 24 th 
     */
-    uint8 pairIndex = slidingWindowOracle.observationIndexOf(block.timestamp);
-    slidingWindowOracle.update(address(this), daiAddress);
-    
-    if (pairIndex == 0) { return; } // pass first delta
-    int reserveMultiplier_t_0 = Fixidity.subtract(
-      1,
-      Fixidity.reciprocal(int(_reserveRequirement))
+
+    // the reserve Multiplier approximates the anticipated growth in Fren supply given a reserve ratio
+    // FREN adjusts this reserve ratio to generate positive or negative divergence in the money field
+    // to maintain orbit around the 1:1 peg
+    uint unity = DecimalMath.unit(ERC20.decimals());
+    // M = 1 - ( 1 / rr)
+    uint reserveMultiplier_t_0 = DecimalMath.subd(
+      unity,
+      DecimalMath.divd(
+        unity,
+        reserveRequirement
+      )
     );
     
     (
       uint fren_reserve,
       uint dai_reserve,
       uint last_block_timestap
-    ) = IUniswapV2Pair(
+    ) = Stub.UniswapV2Pair(
       Helpers.pairFor(
         address(uniswapV2Factory),
         address(daiToken),
@@ -173,23 +138,60 @@ contract FREN is ERC20, ReentrancyGuard {
       )
     ).getReserves();
     if (fren_reserve <= dai_reserve) {
-     uint difference = dai_reserve - fren_reserve;
-     int reserveMultiplier_t_1 = Fixidity.divide(int(difference), int(ERC20.totalSupply())) + 1;
-     int reserveMulDiff = Fixidity.subtract(reserveMultiplier_t_1, reserveMultiplier_t_0);
-     int delta = Fixidity.divide(reserveMulDiff, 24);
-     reserveMultiplier_t_1 = Fixidity.subtract(
+     uint difference = dai_reserve.sub(fren_reserve);
+     uint reserveMultiplier_t_1 = DecimalMath.divd(
+       difference,
+       ERC20.totalSupply()
+     ) + unity;
+     uint reserveMulDiff = DecimalMath.subd(
+       reserveMultiplier_t_1,
+       reserveMultiplier_t_0
+     );
+     uint delta = DecimalMath.divd(
+       reserveMulDiff,
+       DecimalMath.muld(24, unity)
+     );
+     reserveMultiplier_t_1 = DecimalMath.subd(
       reserveMultiplier_t_1,
       delta
      );
-     _reserveRequirement = uint(Fixidity.subtract(
-       1,
-       Fixidity.reciprocal(reserveMultiplier_t_1)
-     ));
+     reserveRequirement = DecimalMath.subd(
+       unity,
+       DecimalMath.divd(
+        unity,
+        reserveMultiplier_t_1
+       )
+     );
     } else {
 
-     uint difference = fren_reserve - dai_reserve;
+     uint difference = fren_reserve.sub(dai_reserve);
+     uint reserveMultiplier_t_1 = DecimalMath.divd(
+       difference,
+       ERC20.totalSupply()
+     ) + unity;
+     uint reserveMulDiff = DecimalMath.subd(
+       reserveMultiplier_t_0,
+       reserveMultiplier_t_1
+     );
+     uint delta = DecimalMath.divd(
+       reserveMulDiff,
+       DecimalMath.muld(24, unity)
+     );
+     reserveMultiplier_t_1 = DecimalMath.addd(
+      reserveMultiplier_t_1,
+      delta
+     );
+     reserveRequirement = DecimalMath.addd(
+       unity,
+       DecimalMath.divd(
+        unity,
+        reserveMultiplier_t_1
+       )
+     );
     }
-    /*
+    
+
+     /* using oracle weighted prices is probably alot smarter than the state of the pool at whatever position the miner wants it in a block
     (uint timestamp_t_1, uint fren_t_1, uint dai_t_1 ) = slidingWindowOracle.pairObservations(uniswapPairAddress, pairIndex);
     int pair_t_1 = Fixidity.divide(int(fren_t_1), int(dai_t_1));
     
@@ -200,13 +202,18 @@ contract FREN is ERC20, ReentrancyGuard {
       // changeReserveRatio to send back to 1
 
 
-      uint multiplier = Helpers.percent(1 * ERC20.decimals(), _reserveRequirement, ERC20.decimals());
+      uint multiplier = Helpers.percent(1 * ERC20.decimals(), reserveRequirement, ERC20.decimals());
     } else { // (-) 
       
     }
 
     */
-
+    // why use oracle prices when i can query reserve of liquidity pool?
+    //uint8 pairIndex = slidingWindowOracle.observationIndexOf(block.timestamp);
+    //slidingWindowOracle.update(address(this), address(daiToken));
+    
+    //if (pairIndex == 0) { return; } // pass first delta
+    
     // determine price vector t_0 and t_1
     // if (+)
     // reduce reserve requirement so the money multiplier re balances to 1:1
@@ -227,10 +234,10 @@ contract FREN is ERC20, ReentrancyGuard {
     uint256 daysTillExpiry = lengthOfTimeInS / dayInS;
     
     if (daysTillExpiry < 365) {
-      uint256 increment = relevantAccount.reserveRequirement / 365;
+      uint256 increment = reserveRequirement / 365;
       return daysTillExpiry*increment;
     }
-    return _reserveRequirement;
+    return reserveRequirement;
   }
 
   modifier isWithinReserveRatio(
@@ -238,9 +245,20 @@ contract FREN is ERC20, ReentrancyGuard {
     uint256 amount
   ) {
     Account memory account = _accounts[lendor];
+    uint proportion = DecimalMath.divd(
+      account.credibilityPoints,
+      totalCredibilityPoints
+    );
     uint256 balance = balanceOf(lendor);
-    uint256 currentRatio = Helpers.percent(account.liabilities + amount, balance, 18);
-    require(currentRatio <= _reserveRequirement, "apologies, reserve requirement exceeded");
+    uint currentRatio = DecimalMath.divd(
+      account.liabilities + amount,
+      balance
+    );
+    uint activeRequirement = DecimalMath.muld(
+      proportion,
+      reserveRequirement
+    );
+    require(currentRatio <= activeRequirement, "apologies, reserve requirement exceeded");
     _;
   }
 
@@ -311,7 +329,7 @@ contract FREN is ERC20, ReentrancyGuard {
     // change globals
     //_outstandingInterest += loan.interest;
 
-    slidingWindowOracle.update(daiAddress, address(this));
+    slidingWindowOracle.update(address(daiToken), address(this));
     emit loanSign(lendor, index, msg.sender);
   }
   
@@ -332,9 +350,15 @@ contract FREN is ERC20, ReentrancyGuard {
 
     _transfer(msg.sender, lendor, loan.interest);
     _burn(msg.sender, loan.principle);
+    
     debtorAccount.liabilities.sub(loan.principle + loan.interest);
+    debtorAccount.credibilityPoints.add(loan.principle + loan.interest);
+    totalCredibilityPoints.add(loan.principle + loan.interest);
+    
     lendorAccount.assets.sub(loan.principle + loan.interest);
     lendorAccount.liabilities.sub(loan.principle);
+    lendorAccount.credibilityPoints.add(loan.principle + loan.interest);
+    totalCredibilityPoints.add(loan.principle + loan.interest);
     
     //_outstandingInterest -= loan.interest;
     emit loanRepaid(lendor, index, msg.sender);
