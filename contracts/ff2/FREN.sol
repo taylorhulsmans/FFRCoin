@@ -15,10 +15,10 @@ contract FREN is ERC20, ReentrancyGuard {
   *
   *
   */
-  Stub.DaiToken daiToken;
-  Stub.UniswapV2Factory uniswapV2Factory;
-  Stub.UniswapV2Router02 uniswapV2Router02;
-  Stub.SlidingWindowOracle slidingWindowOracle;
+  Stub.sDaiToken daiToken;
+  Stub.sUniswapV2Factory uniswapV2Factory;
+  Stub.sUniswapV2Router02 uniswapV2Router02;
+  Stub.sSlidingWindowOracle slidingWindowOracle;
   address public uniswapPairAddress;
   
   /* State
@@ -90,10 +90,10 @@ contract FREN is ERC20, ReentrancyGuard {
     'FREN'
   )
   {
-    daiToken = Stub.DaiToken(daiAddress);
-    uniswapV2Factory = Stub.UniswapV2Factory(uniswapV2FactoryAddress);
+    daiToken = Stub.sDaiToken(daiAddress);
+    uniswapV2Factory = Stub.sUniswapV2Factory(uniswapV2FactoryAddress);
     uniswapPairAddress = uniswapV2Factory.createPair(daiAddress, address(this));
-    slidingWindowOracle = Stub.SlidingWindowOracle(slidingWindowOracleAddress);
+    slidingWindowOracle = Stub.sSlidingWindowOracle(slidingWindowOracleAddress);
     _mint(msg.sender, initialAmount);
     reserveRequirement = DecimalMath.unit(ERC20.decimals());
 
@@ -130,7 +130,7 @@ contract FREN is ERC20, ReentrancyGuard {
       uint fren_reserve,
       uint dai_reserve,
       uint last_block_timestap
-    ) = Stub.UniswapV2Pair(
+    ) = Stub.sUniswapV2Pair(
       Helpers.pairFor(
         address(uniswapV2Factory),
         address(daiToken),
@@ -222,6 +222,21 @@ contract FREN is ERC20, ReentrancyGuard {
 
   }
  
+    function getReserves() public view returns (uint fren, uint dai, uint last_timestamp) {
+    (
+      uint fren,
+      uint dai,
+      uint last_block_timestamp
+    ) = Stub.sUniswapV2Pair(
+      Helpers.pairFor(
+        address(uniswapV2Factory),
+        address(daiToken),
+        address(this)
+      )
+    ).getReserves();
+    return (fren, dai, last_block_timestamp);
+  }
+
   function timeAdjustedRR(
     address account,
     uint256 expiryDate

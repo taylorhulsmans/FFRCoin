@@ -28,7 +28,8 @@
         }
       ],
       "stateMutability": "pure",
-      "type": "function"
+      "type": "function",
+      "constant": true
     }
   ],
   "metadata": "{\"compiler\":{\"version\":\"0.7.1+commit.f4a555be\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"numerator\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"denominator\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"precision\",\"type\":\"uint256\"}],\"name\":\"percent\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"quotient\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/taylor/ff2/contracts/ff2/Helpers.sol\":\"Helpers\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/taylor/ff2/contracts/ff2/Helpers.sol\":{\"keccak256\":\"0x876ecfaf3467ec7130582839028b963f092125046bb27a4eae2bbd16b4781af7\",\"urls\":[\"bzz-raw://f7b0795a459410009d86fae13e39bc095e3dfbd510eb27c68368a06781dd99ab\",\"dweb:/ipfs/Qmc2ateShtJLqDC1cKM5HUT9NdP3yJQK5cz9DZy364sks4\"]}},\"version\":1}",
@@ -9259,10 +9260,17 @@
       "links": {},
       "address": "0x047ebEB68eec9327f4E2d4c489fD0cB854d39235",
       "transactionHash": "0x047e69d063284ebb601e659d4a72f76895843dc038eb0ecdba1455a62d14230f"
+    },
+    "1603116008671": {
+      "events": {},
+      "links": {},
+      "address": "0x77036E95b12295CeA171B7e8049Cabf8F527f1A4",
+      "transactionHash": "0xdb71ba3e77d6f44674f06d53fc70315c528f6f08700402132028df5adc576612"
     }
   },
   "schemaVersion": "3.3.0",
-  "updatedAt": "2020-10-19T17:03:14.737Z",
+  "updatedAt": "2020-10-20T00:32:17.988Z",
+  "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
     "methods": {},

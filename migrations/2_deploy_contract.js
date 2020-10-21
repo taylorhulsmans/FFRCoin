@@ -1,5 +1,5 @@
 var Helpers = artifacts.require('Helpers');
-var Fixidity = artifacts.require('Fixidity')
+var DecimalMath = artifacts.require('DecimalMath')
 var FREN = artifacts.require('FREN')
 var DaiMock = artifacts.require('DaiMock')
 var AdvancedWETH = artifacts.require('AdvancedWETH')
@@ -44,8 +44,8 @@ function frenAddr(sender, nonce) {
 
 
 module.exports =  async function(deployer, network, accounts) {
-  let FixidityDeploy = await deployer.deploy(Fixidity);
-  deployer.link(Fixidity, FREN);
+  let DecimalMathDeploy = await deployer.deploy(DecimalMath);
+  deployer.link(DecimalMath, FREN);
   let HelperDeploy = await deployer.deploy(Helpers);
   deployer.link(Helpers, FREN);
 
@@ -86,13 +86,10 @@ module.exports =  async function(deployer, network, accounts) {
   frenInstance = await FREN.deployed()
   let balance_fren = await balance(frenInstance, accounts[0])
   let balance_dai = await balance(daiInstance, accounts[0])
-  console.log(balance_fren, balance_dai)
   await frenInstance.approve.sendTransaction(UniswapV2Router02.address, halfInitial)
   // createLiquidity
   //
-  console.log(await allowance(daiInstance, accounts[0], UniswapV2Router02.address))
-  console.log(await allowance(frenInstance, accounts[0], UniswapV2Router02.address))
-  await uniswapRouterInstance.addLiquidity(
+  let response = await uniswapRouterInstance.addLiquidity.sendTransaction(
     daiInstance.address,
     frenInstance.address,
     halfInitial,

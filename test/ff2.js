@@ -2,7 +2,6 @@ const FREN = artifacts.require("FREN");
 const DaiMock = artifacts.require("DaiMock");
 var UniswapV2Factory = artifacts.require('UniswapV2Factory')
 var UniswapV2Router02 = artifacts.require('UniswapV2Router02')
-var UniswapV2Library = artifacts.require('UniswapV2Library')
 const Web3 = require('web3')
 const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:9545'))
 
@@ -21,6 +20,17 @@ contract("FREN", async (accounts) => {
     )
   }
 
+  async function getReserves() {
+    
+    let response = await frenInstance.getReserves.call()
+    return {
+      dai: Number(web3.utils.fromWei(response.dai)),
+      fren: Number(web3.utils.fromWei(response.fren)),
+      timestamp: Number(response.last_timestamp),
+    }
+  }
+
+
 
   beforeEach("setup", async () => {
     
@@ -28,20 +38,23 @@ contract("FREN", async (accounts) => {
     
     frenInstance = await FREN.deployed(
     )
-    //uniLib = await UniswapV2Library.deployed()
 
   })
 
-  it("should have equal fren and dai inside", async () => {
-    let fren_dai_0 = await balance(mockDaiInstance, accounts[0])
-    let fren_fren_0 = await balance(frenInstance, accounts[0])
-    assert.equal(fren_dai_0, fren_fren_0)
-    console.log(fren_dai_0, fren_fren_0)
+  it("a liquidity pool exists with 100 of each token", async () => {
+    let response = await getReserves()
+    console.log(response)
+    assert.equal(response.dai, 100)
+    assert.equal(response.fren, 100)
+
 
   })
 
-  it("should mint 50 FREN with 50 DAI", async () => {
-
+  it("the fren should be backed by 100 dai", async () => { 
+    let response = await balance(mockDaiInstance, frenInstance.address)
+    assert.equal(response, 100)
+  })
+  it("", async () => { 
   })
 })
 
