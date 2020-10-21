@@ -44,14 +44,24 @@ function frenAddr(sender, nonce) {
 
 
 module.exports =  async function(deployer, network, accounts) {
+  /*
+   * Helpers
+   */
   let DecimalMathDeploy = await deployer.deploy(DecimalMath);
   deployer.link(DecimalMath, FREN);
   let HelperDeploy = await deployer.deploy(Helpers);
   deployer.link(Helpers, FREN);
 
+
+  /*
+   * Deps for fake
+   */
   await deployer.deploy(AdvancedWETH, accounts[0])
   wethInstance = await AdvancedWETH.deployed()
 
+  /*
+   * Uniswap
+   */
   await deployer.deploy(UniswapV2Library)
   await deployer.deploy(UniswapV2Factory, accounts[0])
   uniswapFactoryInstance = await UniswapV2Factory.deployed()
@@ -59,19 +69,25 @@ module.exports =  async function(deployer, network, accounts) {
   await deployer.deploy(UniswapV2Router02, uniswapFactoryInstance.address, wethInstance.address)
   uniswapRouterInstance = await UniswapV2Router02.deployed()
 
-  let initial = web3.utils.toWei('200', 'ether')
-  let halfInitial = web3.utils.toWei('100', 'ether')
-  // 200 dai minted to msg.sender
-  await deployer.deploy(DaiMock, initial);
-  daiInstance = await DaiMock.deployed()
-  // give half to fren
-  //
-  //
-  await daiInstance.approve.sendTransaction(UniswapV2Router02.address, halfInitial)
-
   //https://github.com/Uniswap/uniswap-v2-periphery/blob/master/contracts/examples/ExampleSlidingWindowOracle.sol#L28
   await deployer.deploy(ExampleSlidingWindowOracle, uniswapFactoryInstance.address, 24, 24)
   exampleSlidingWindowOracleInstance = await ExampleSlidingWindowOracle.deployed()
+
+  /*
+   * 100 dai to the swap
+   * 100 dai to back the fren 1:1
+   * 100 dai for user 1 to test the optimistic case
+   */
+  let initialDai = web3.utils.toWei('300', 'ether')
+  let centiDai = web3.utils.toWei('100', 'ether')
+  // 200 dai minted to msg.sender
+  await deployer.deploy(DaiMock, initialDai);
+  daiInstance = await DaiMock.deployed()
+
+  //
+  //
+  await daiInstance.approve.sendTransaction(UniswapV2Router02.address, centiDai)
+
 
   let nonce = await web3.eth.getTransactionCount(accounts[0], 'pending')
   nonce = nonce + 1
@@ -80,20 +96,20 @@ module.exports =  async function(deployer, network, accounts) {
     nonce
   )
   console.log('future', frenFutureAddress)
-  await daiInstance.transfer.sendTransaction(frenFutureAddress, halfInitial)
+  await daiInstance.transfer.sendTransaction(frenFutureAddress, centiDai)
 
-  await deployer.deploy(FREN, halfInitial, daiInstance.address, uniswapFactoryInstance.address, uniswapRouterInstance.address, exampleSlidingWindowOracleInstance.address )
+  await deployer.deploy(FREN, centiDai, daiInstance.address, uniswapFactoryInstance.address, uniswapRouterInstance.address, exampleSlidingWindowOracleInstance.address )
   frenInstance = await FREN.deployed()
   let balance_fren = await balance(frenInstance, accounts[0])
   let balance_dai = await balance(daiInstance, accounts[0])
-  await frenInstance.approve.sendTransaction(UniswapV2Router02.address, halfInitial)
+  await frenInstance.approve.sendTransaction(UniswapV2Router02.address, centiDai)
   // createLiquidity
   //
   let response = await uniswapRouterInstance.addLiquidity.sendTransaction(
     daiInstance.address,
     frenInstance.address,
-    halfInitial,
-    halfInitial,
+    centiDai,
+    centiDai,
     0,
     0,
     accounts[0],

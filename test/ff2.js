@@ -9,7 +9,10 @@ const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:9545'))
 contract("FREN", async (accounts) => {
   let mockDaiInstance;
   let frenInstance;
+  let routerInstance;
 
+
+  let duoDai = web3.utils.toWei('1', 'ether')
 
   async function balance(instance, account) {
     return Number(
@@ -36,8 +39,9 @@ contract("FREN", async (accounts) => {
     
     mockDaiInstance = await DaiMock.deployed()
     
-    frenInstance = await FREN.deployed(
-    )
+    frenInstance = await FREN.deployed()
+
+    routerInstance = await UniswapV2Router02.deployed()
 
   })
 
@@ -54,7 +58,28 @@ contract("FREN", async (accounts) => {
     let response = await balance(mockDaiInstance, frenInstance.address)
     assert.equal(response, 100)
   })
-  it("", async () => { 
+
+  it("dai is swapped for fren", async () => {
+    let user1_dai_0 = await balance(mockDaiInstance, accounts[0])
+    let user1_fren_0 = await balance(frenInstance, accounts[0])
+    assert.equal(user1_dai_0, 100)
+    assert.equal(user1_fren_0, 0)
+    let duoDai = web3.utils.toWei('2', 'ether')
+    await mockDaiInstance.approve.sendTransaction(routerInstance.address, duoDai)
+    await frenInstance.approve.sendTransaction(routerInstance.address, duoDai)
+    let path = [mockDaiInstance.address, frenInstance.address]
+    let swap = await routerInstance.swapTokensForExactTokens.sendTransaction(
+      web3.utils.toWei('1', 'ether'),
+      web3.utils.toWei('2', 'ether'),
+      path,
+      accounts[0],
+      Math.floor(Date.now() / 1000) + 3600
+    )
+    let user1_dai_1 = await balance(mockDaiInstance, accounts[0])
+    let user1_fren_1 = await balance(frenInstance, accounts[0])
+    assert.equal(user1_fren_1, 1)
+    assert.isBelow(user1_dai_1, 99)
+    console.log(await getReserves())
   })
 })
 
