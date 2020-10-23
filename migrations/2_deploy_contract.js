@@ -100,11 +100,18 @@ module.exports =  async function(deployer, network, accounts) {
 
   await deployer.deploy(FREN, centiDai, daiInstance.address, uniswapFactoryInstance.address, uniswapRouterInstance.address, exampleSlidingWindowOracleInstance.address )
   frenInstance = await FREN.deployed()
+
+  //let obs = await frenInstance.pairObservations.call()
+  //console.log(obs)
   let balance_fren = await balance(frenInstance, accounts[0])
   let balance_dai = await balance(daiInstance, accounts[0])
   await frenInstance.approve.sendTransaction(UniswapV2Router02.address, centiDai)
   // createLiquidity
   //
+  console.log(balance_fren)
+  console.log(balance_dai)
+  console.log(await allowance(frenInstance, accounts[0], uniswapRouterInstance.address))
+  console.log(await allowance(daiInstance, accounts[0], uniswapRouterInstance.address))
   let response = await uniswapRouterInstance.addLiquidity.sendTransaction(
     daiInstance.address,
     frenInstance.address,

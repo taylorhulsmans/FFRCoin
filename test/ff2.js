@@ -12,7 +12,7 @@ contract("FREN", async (accounts) => {
   let routerInstance;
 
 
-  let duoDai = web3.utils.toWei('1', 'ether')
+  let uniDai = web3.utils.toWei('1', 'ether')
 
   async function balance(instance, account) {
     return Number(
@@ -21,6 +21,11 @@ contract("FREN", async (accounts) => {
         'ether'
       )
     )
+  }
+
+  async function reserveLimit() {
+    const reserveLimit = await frenInstance.reserveLimit.call()
+    return Number(web3.utils.fromWei(reserveLimit), 'ether')
   }
 
   async function getReserves() {
@@ -32,6 +37,8 @@ contract("FREN", async (accounts) => {
       timestamp: Number(response.last_timestamp),
     }
   }
+
+
 
 
 
@@ -50,8 +57,11 @@ contract("FREN", async (accounts) => {
     console.log(response)
     assert.equal(response.dai, 100)
     assert.equal(response.fren, 100)
+  })
 
-
+  it("reserve Limit is set to zero", async () => {
+    assert.equal(await reserveLimit(), 0)
+    
   })
 
   it("the fren should be backed by 100 dai", async () => { 
@@ -64,13 +74,17 @@ contract("FREN", async (accounts) => {
     let user1_fren_0 = await balance(frenInstance, accounts[0])
     assert.equal(user1_dai_0, 100)
     assert.equal(user1_fren_0, 0)
-    let duoDai = web3.utils.toWei('2', 'ether')
-    await mockDaiInstance.approve.sendTransaction(routerInstance.address, duoDai)
-    await frenInstance.approve.sendTransaction(routerInstance.address, duoDai)
+    
     let path = [mockDaiInstance.address, frenInstance.address]
+    
+    let amountOut = await routerInstance.getAmountsIn(uniDai, path)
+
+    await mockDaiInstance.approve.sendTransaction(routerInstance.address, amountOut[0])
+  
+
     let swap = await routerInstance.swapTokensForExactTokens.sendTransaction(
       web3.utils.toWei('1', 'ether'),
-      web3.utils.toWei('2', 'ether'),
+      amountOut[0],
       path,
       accounts[0],
       Math.floor(Date.now() / 1000) + 3600
@@ -79,7 +93,15 @@ contract("FREN", async (accounts) => {
     let user1_fren_1 = await balance(frenInstance, accounts[0])
     assert.equal(user1_fren_1, 1)
     assert.isBelow(user1_dai_1, 99)
-    console.log(await getReserves())
   })
+
+  it("should lift the reserve limit", async () => {
+    
+    assert.equal(await reserveLimit(), 0)
+    
+  })
+
+
+
 })
 

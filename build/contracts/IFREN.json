@@ -1,0 +1,109 @@
+{
+  "contractName": "IFREN",
+  "abi": [],
+  "metadata": "{\"compiler\":{\"version\":\"0.7.1+commit.f4a555be\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/taylor/ff2/contracts/ff2/IFREN.sol\":\"IFREN\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/taylor/ff2/contracts/ff2/IFREN.sol\":{\"keccak256\":\"0x9a4312d5e443bf5fe698f04951d47d5d23cd0fb49466377f608612946056ba58\",\"urls\":[\"bzz-raw://c24a72c784ae4e6e57ad4ddba3681e9b53de4a02ad1da3255b974c003601f548\",\"dweb:/ipfs/Qmb6wK6juCr24rBgiREqxG8oc2Ro8Mrj6acVPg8B874HTG\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "pragma solidity ^0.7.1;\n\n\ninterface IFREN {\n\n  \n/* (1 / rr)*total_supply = total_supply + diff\n* internal system tracts 1 - rr for easier comparison in modifiers\n* system not 100% sensitive, moves at 1 / 24 th \n*/\n\n// the reserve Multiplier approximates the anticipated growth in Fren supply given a reserve ratio\n// FREN adjusts this reserve ratio to generate positive or negative divergence in the money field\n// to maintain orbit around the 1:1 peg\n\n}\n",
+  "sourcePath": "/home/taylor/ff2/contracts/ff2/IFREN.sol",
+  "ast": {
+    "absolutePath": "/home/taylor/ff2/contracts/ff2/IFREN.sol",
+    "exportedSymbols": {
+      "IFREN": [
+        2608
+      ]
+    },
+    "id": 2609,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 2607,
+        "literals": [
+          "solidity",
+          "^",
+          "0.7",
+          ".1"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:5"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": true,
+        "id": 2608,
+        "linearizedBaseContracts": [
+          2608
+        ],
+        "name": "IFREN",
+        "nodeType": "ContractDefinition",
+        "nodes": [],
+        "scope": 2609,
+        "src": "26:428:5"
+      }
+    ],
+    "src": "0:455:5"
+  },
+  "legacyAST": {
+    "absolutePath": "/home/taylor/ff2/contracts/ff2/IFREN.sol",
+    "exportedSymbols": {
+      "IFREN": [
+        2608
+      ]
+    },
+    "id": 2609,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 2607,
+        "literals": [
+          "solidity",
+          "^",
+          "0.7",
+          ".1"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:5"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": true,
+        "id": 2608,
+        "linearizedBaseContracts": [
+          2608
+        ],
+        "name": "IFREN",
+        "nodeType": "ContractDefinition",
+        "nodes": [],
+        "scope": 2609,
+        "src": "26:428:5"
+      }
+    ],
+    "src": "0:455:5"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.7.1+commit.f4a555be.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.3.0",
+  "updatedAt": "2020-10-22T22:38:01.428Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

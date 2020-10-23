@@ -13917,9 +13917,23 @@
     "name": "solc",
     "version": "0.7.1+commit.f4a555be.Emscripten.clang"
   },
-  "networks": {},
+  "networks": {
+    "1603250353576": {
+      "events": {},
+      "links": {},
+      "address": "0x9Ce579A3B6024387010a490b7269E8b38A7F36DD",
+      "transactionHash": "0xf4396428867e995b0d52d55b66923c1df28957b29027e8f75183d48dd6821fb9"
+    },
+    "1603406794977": {
+      "events": {},
+      "links": {},
+      "address": "0x047ebEB68eec9327f4E2d4c489fD0cB854d39235",
+      "transactionHash": "0xfde6c3977b2d6ff09f5c857a7f915b54d0fa3bfd492f0d009a569d7e61d45c7d"
+    }
+  },
   "schemaVersion": "3.3.0",
-  "updatedAt": "2020-10-19T17:03:14.704Z",
+  "updatedAt": "2020-10-23T01:39:04.748Z",
+  "networkType": "ethereum",
   "devdoc": {
     "author": "Alberto Cuesta Cañada",
     "details": "Implements simple fixed point math add, sub, mul and div operations.",

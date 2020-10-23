@@ -5,7 +5,7 @@ import * as contractData from '../assets/FREN.json';
 export async function getDaiContract() {
   let addr = null;
   if (process.env.NODE_ENV === 'development') {
-    addr = '0x8D18D79e18D06139884AEeAfdEb09a366B033963'
+    addr = '0x532622C89B7717668A7836527050c356879c8D7E'
   } else {
     addr = '0x0207dD259AEC31524427737B28ec84227bb2B17B'
   }

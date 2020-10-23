@@ -29,7 +29,7 @@ contract FREN is ERC20, ReentrancyGuard {
   // an account may not loan past (Assets / Liabilities)*(credibilityPoints/TotalCredibilityPoints)
   // this is their share of money printing, a proportion of the global reserve requirement whose size is based on being atop the leaderboard
   // is fixed point with 18 decimals
-  uint public reserveRequirement;
+  uint public reserveLimit;
   uint public totalCredibilityPoints;
 
   struct Account {
@@ -95,12 +95,37 @@ contract FREN is ERC20, ReentrancyGuard {
     uniswapPairAddress = uniswapV2Factory.createPair(daiAddress, address(this));
     slidingWindowOracle = Stub.sSlidingWindowOracle(slidingWindowOracleAddress);
     _mint(msg.sender, initialAmount);
-    reserveRequirement = DecimalMath.unit(ERC20.decimals());
+    reserveLimit = DecimalMath.unit(ERC20.decimals()) - DecimalMath.unit(ERC20.decimals());
 
   }
 
+  /*
+  * Overrides
+  */
+
+ function _beforeTokenTransfer(
+   address from,
+   address to,
+   uint256 amount
+ ) internal virtual override {
+   if (from != address(0))  {
+      update();
+   }
+ }
+
   function daiReserve() public view returns (uint256){
     return daiToken.balanceOf(address(this));
+  }
+
+  function pairObservations() external view returns (uint256 timestamp, uint256 price0Cumulative, uint256 price1Cumulative) {
+    // the pairIndexs are populated with data that doesn't exist, empty push, i should make a push to uniswap :)
+    uint8 pairIndex = slidingWindowOracle.observationIndexOf(block.timestamp);
+    (
+      uint256 timestamp_t_1,
+      uint256 fren_t_1,
+      uint256 dai_t_1
+    ) = slidingWindowOracle.pairObservations(uniswapPairAddress, pairIndex);
+    return (timestamp_t_1, fren_t_1, dai_t_1);
   }
 
   /* Reserve req Mod
@@ -108,54 +133,59 @@ contract FREN is ERC20, ReentrancyGuard {
   */
 
   function update() internal {
-    /* (1 / rr)*total_supply = total_supply + diff
-    * internal system tracts 1 - rr for easier comparison in modifiers
-    * system not 100% sensitive, moves at 1 / 24 th 
-    */
-
-    // the reserve Multiplier approximates the anticipated growth in Fren supply given a reserve ratio
-    // FREN adjusts this reserve ratio to generate positive or negative divergence in the money field
-    // to maintain orbit around the 1:1 peg
+    uint8 pairIndex = slidingWindowOracle.observationIndexOf(block.timestamp);
+    if (pairIndex <= 1) {
+      //slidingWindowOracle.update(address(this), address(daiToken));
+      return;
+    }
     uint unity = DecimalMath.unit(ERC20.decimals());
-    // M = 1 - ( 1 / rr)
-    uint reserveMultiplier_t_0 = DecimalMath.subd(
+    /* M = 1 / RR 
+       M = 1 / ( 1 - RL)
+    */
+ 
+    uint reserveMultiplier_t_0 = DecimalMath.divd(
       unity,
-      DecimalMath.divd(
+      DecimalMath.subd(
         unity,
-        reserveRequirement
+        reserveLimit
       )
     );
     
+    return;
     (
-      uint fren_reserve,
-      uint dai_reserve,
-      uint last_block_timestap
-    ) = Stub.sUniswapV2Pair(
-      Helpers.pairFor(
-        address(uniswapV2Factory),
-        address(daiToken),
-        address(this)
-      )
-    ).getReserves();
-    if (fren_reserve <= dai_reserve) {
-     uint difference = dai_reserve.sub(fren_reserve);
-     uint reserveMultiplier_t_1 = DecimalMath.divd(
-       difference,
-       ERC20.totalSupply()
-     ) + unity;
-     uint reserveMulDiff = DecimalMath.subd(
-       reserveMultiplier_t_1,
-       reserveMultiplier_t_0
-     );
-     uint delta = DecimalMath.divd(
-       reserveMulDiff,
-       DecimalMath.muld(24, unity)
-     );
-     reserveMultiplier_t_1 = DecimalMath.subd(
-      reserveMultiplier_t_1,
-      delta
-     );
-     reserveRequirement = DecimalMath.subd(
+      uint256 timestamp_t_1,
+      uint256 fren_t_1,
+      uint256 dai_t_1
+    ) = slidingWindowOracle.pairObservations(uniswapPairAddress, pairIndex);
+
+    (
+      uint timestamp_t_0,
+      uint fren_t_0,
+      uint dai_t_0
+    ) = slidingWindowOracle.pairObservations(uniswapPairAddress, pairIndex--);
+  
+    if (fren_t_0 <= fren_t_1) {
+      // price pressure, release by letting people print
+      uint delta_fren = DecimalMath.divd(
+        (fren_t_1.sub(fren_t_0)),
+         fren_t_0
+      );
+
+      // increase money multipler by delta
+      uint reserveMultiplier_t_1 = DecimalMath.addd(
+          delta_fren,
+          reserveMultiplier_t_0
+      );
+      /*
+
+       (1 - RL)*M = 1
+       (1 - RL) = 1 / M
+       - RL = 1 / M - 1
+        RL = 1 - (1 /M)
+      */
+
+
+     reserveLimit = DecimalMath.subd(
        unity,
        DecimalMath.divd(
         unity,
@@ -163,25 +193,27 @@ contract FREN is ERC20, ReentrancyGuard {
        )
      );
     } else {
+      // negative price pressure, restrict lending
+      uint delta_fren = DecimalMath.divd(
+        (fren_t_0.sub(fren_t_1)),
+         fren_t_1
+      );
 
-     uint difference = fren_reserve.sub(dai_reserve);
-     uint reserveMultiplier_t_1 = DecimalMath.divd(
-       difference,
-       ERC20.totalSupply()
-     ) + unity;
-     uint reserveMulDiff = DecimalMath.subd(
-       reserveMultiplier_t_0,
-       reserveMultiplier_t_1
-     );
-     uint delta = DecimalMath.divd(
-       reserveMulDiff,
-       DecimalMath.muld(24, unity)
-     );
-     reserveMultiplier_t_1 = DecimalMath.addd(
-      reserveMultiplier_t_1,
-      delta
-     );
-     reserveRequirement = DecimalMath.addd(
+      // decrease money multipler by delta
+      uint reserveMultiplier_t_1 = DecimalMath.subd(
+          delta_fren,
+          reserveMultiplier_t_0
+      );
+
+      /*
+       (1 - RL)*M = 1
+       (1 - RL) = 1 / M
+       - RL = 1 / M - 1
+        RL = 1 - (1 /M)
+      */
+
+
+     reserveLimit = DecimalMath.subd(
        unity,
        DecimalMath.divd(
         unity,
@@ -190,36 +222,7 @@ contract FREN is ERC20, ReentrancyGuard {
      );
     }
     
-
-     /* using oracle weighted prices is probably alot smarter than the state of the pool at whatever position the miner wants it in a block
-    (uint timestamp_t_1, uint fren_t_1, uint dai_t_1 ) = slidingWindowOracle.pairObservations(uniswapPairAddress, pairIndex);
-    int pair_t_1 = Fixidity.divide(int(fren_t_1), int(dai_t_1));
-    
-    (uint timestamp_t_0, uint fren_t_0, uint dai_t_0 ) = slidingWindowOracle.pairObservations(uniswapPairAddress, pairIndex--);
-    int pair_t_0 = Fixidity.divide(int(fren_t_0), int(dai_t_0));
-    if (pair_t_1 >= pair_t_0) { // (+)
-      uint256 frenShortage = 
-      // changeReserveRatio to send back to 1
-
-
-      uint multiplier = Helpers.percent(1 * ERC20.decimals(), reserveRequirement, ERC20.decimals());
-    } else { // (-) 
-      
-    }
-
-    */
-    // why use oracle prices when i can query reserve of liquidity pool?
-    //uint8 pairIndex = slidingWindowOracle.observationIndexOf(block.timestamp);
-    //slidingWindowOracle.update(address(this), address(daiToken));
-    
-    //if (pairIndex == 0) { return; } // pass first delta
-    
-    // determine price vector t_0 and t_1
-    // if (+)
-    // reduce reserve requirement so the money multiplier re balances to 1:1
-    // if (-)
-    // tighten reserve requirement to the mony multiple re balances to 1:1
-
+    slidingWindowOracle.update(address(this), address(daiToken));
   }
  
     function getReserves() public view returns (uint fren, uint dai, uint last_timestamp) {
@@ -249,10 +252,10 @@ contract FREN is ERC20, ReentrancyGuard {
     uint256 daysTillExpiry = lengthOfTimeInS / dayInS;
     
     if (daysTillExpiry < 365) {
-      uint256 increment = reserveRequirement / 365;
+      uint256 increment = reserveLimit / 365;
       return daysTillExpiry*increment;
     }
-    return reserveRequirement;
+    return reserveLimit;
   }
 
   modifier isWithinReserveRatio(
@@ -271,7 +274,7 @@ contract FREN is ERC20, ReentrancyGuard {
     );
     uint activeRequirement = DecimalMath.muld(
       proportion,
-      reserveRequirement
+      reserveLimit
     );
     require(currentRatio <= activeRequirement, "apologies, reserve requirement exceeded");
     _;

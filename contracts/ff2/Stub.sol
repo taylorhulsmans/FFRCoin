@@ -30,7 +30,7 @@ interface sUniswapV2Router02 {
 }
 
 interface sSlidingWindowOracle {
-  function pairObservations(address swap, uint8 index) external view returns (uint256 timestamp, uint256 cumulativeP0, uint256 cumulativeP1);
+  function pairObservations(address swap, uint8 index) external view returns (uint256 timestamp, uint256 price0Cumulative, uint256 price1Cumulative);
   function observationIndexOf(uint timestamp) external view returns (uint8 index);
   function update(address tokenA, address tokenB) external;
 }
