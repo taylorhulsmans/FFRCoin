@@ -133,16 +133,10 @@ contract FREN is ERC20, ReentrancyGuard {
   */
 
   function update() internal {
-    uint8 pairIndex = slidingWindowOracle.observationIndexOf(block.timestamp);
-    if (pairIndex <= 1) {
-      //slidingWindowOracle.update(address(this), address(daiToken));
-      return;
-    }
     uint unity = DecimalMath.unit(ERC20.decimals());
     /* M = 1 / RR 
        M = 1 / ( 1 - RL)
     */
- 
     uint reserveMultiplier_t_0 = DecimalMath.divd(
       unity,
       DecimalMath.subd(
@@ -150,30 +144,25 @@ contract FREN is ERC20, ReentrancyGuard {
         reserveLimit
       )
     );
-    
-    return;
-    (
-      uint256 timestamp_t_1,
-      uint256 fren_t_1,
-      uint256 dai_t_1
-    ) = slidingWindowOracle.pairObservations(uniswapPairAddress, pairIndex);
+    ( uint fren,
+      uint dai,
+      uint timestamp
+    ) = getReserves();
 
-    (
-      uint timestamp_t_0,
-      uint fren_t_0,
-      uint dai_t_0
-    ) = slidingWindowOracle.pairObservations(uniswapPairAddress, pairIndex--);
-  
-    if (fren_t_0 <= fren_t_1) {
-      // price pressure, release by letting people print
-      uint delta_fren = DecimalMath.divd(
-        (fren_t_1.sub(fren_t_0)),
-         fren_t_0
+    if (fren == 0 || dai == 0) {
+      return;
+    }
+    if (fren <= dai) {
+      // 101 dai 99 fren
+      uint rebalance = DecimalMath.divd(
+        dai.sub(fren),
+        dai.add(fren)
       );
+      // what is the reserve ratio that will emit this much money
 
       // increase money multipler by delta
       uint reserveMultiplier_t_1 = DecimalMath.addd(
-          delta_fren,
+          rebalance,
           reserveMultiplier_t_0
       );
       /*
@@ -193,35 +182,30 @@ contract FREN is ERC20, ReentrancyGuard {
        )
      );
     } else {
-      // negative price pressure, restrict lending
-      uint delta_fren = DecimalMath.divd(
-        (fren_t_0.sub(fren_t_1)),
-         fren_t_1
+      uint rebalance = DecimalMath.divd(
+        DecimalMath.subd(fren, dai),
+        DecimalMath.addd(dai, fren)
       );
+      // what is the reserve ratio that will emit this much money
 
-      // decrease money multipler by delta
-      uint reserveMultiplier_t_1 = DecimalMath.subd(
-          delta_fren,
-          reserveMultiplier_t_0
-      );
+      // decrease by delta
+      if (rebalance >= reserveMultiplier_t_0) {
+        reserveLimit = 0;
+      } else {
 
-      /*
-       (1 - RL)*M = 1
-       (1 - RL) = 1 / M
-       - RL = 1 / M - 1
-        RL = 1 - (1 /M)
-      */
-
-
-     reserveLimit = DecimalMath.subd(
-       unity,
-       DecimalMath.divd(
-        unity,
-        reserveMultiplier_t_1
-       )
-     );
+        uint reserveMultiplier_t_1 = DecimalMath.subd(
+          reserveMultiplier_t_0,
+          rebalance
+        );
+        reserveLimit = DecimalMath.subd(
+          unity,
+          DecimalMath.divd(
+            unity,
+            reserveMultiplier_t_1
+          )
+        );
+      }
     }
-    
     slidingWindowOracle.update(address(this), address(daiToken));
   }
  
