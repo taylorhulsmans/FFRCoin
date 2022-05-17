@@ -24,13 +24,13 @@ struct Loan {
 }
 
 struct UTXO {
-  address origin;
-  uint256 percentRecycled;
   address owner;
   uint256 value;
   bytes32 createdBy;
   bytes32 id;
-
+  // Modified UTXO
+  address origin; // UTXO's created by lending have this address
+  uint256 gasCumulative; // Gas cumulative from Origin, used for repayment penalty
 }
 
 struct AppStorage {
