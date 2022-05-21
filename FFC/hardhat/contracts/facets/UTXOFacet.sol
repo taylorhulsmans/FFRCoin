@@ -1,6 +1,6 @@
 pragma solidity ^0.8.0;
 
-import { onlyOwner, UTXO } from '../libraries/LibAppStorage.sol';
+import { UTXO } from '../libraries/LibAppStorage.sol';
 
 import { AppStorage, LibAppStorage, Modifiers  } from '../libraries/LibAppStorage.sol';
 contract UTXOFacet {
@@ -27,6 +27,7 @@ contract UTXOFacet {
     ); 
 
     s.utxos[id] = utxo;
+    s.accounts[_to].balance += _value;
     s.totalSupply += _value;
   }
 
